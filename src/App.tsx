@@ -5,6 +5,8 @@ import CommonLayout from "components/layouts/CommonLayout"
 import Home from "components/pages/Home"
 import SignUp from "components/pages/SignUp"
 import SignIn from "components/pages/SignIn"
+import Themes from "components/pages/Themes"
+import Theme from "components/pages/Theme"
 
 import { getCurrentUser } from "lib/api/auth"
 import { User } from "interfaces/index"
@@ -70,7 +72,7 @@ const App: React.FC = () => {
       if (isSignedIn) {
         return children
       } else {
-        return <Navigate to="/signin" />
+        return <Navigate to="/sign_in" />
       }
     } else {
       return <></>
@@ -78,18 +80,32 @@ const App: React.FC = () => {
   }
 
   return (
-    // <Router>
-    //   <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser}}>
-    //     <CommonLayout>
-    //       <Routes>
-    //         <Route path="/signup" element={<SignUp />} />
-    //         <Route path="/signin" element={<SignIn />} />
-    //         <Route path="/" element={<Home />} />
-    //       </Routes>
-    //     </CommonLayout>
-    //   </AuthContext.Provider>
-    // </Router>
-    <h1>{message}</h1>
+    <Router>
+      <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser}}>
+        <CommonLayout>
+          <Routes>
+            <Route path="/sign_up" element={<SignUp />} />
+            <Route path="/sign_in" element={<SignIn />} />
+            <Route path="/themes" element={<Themes />} />
+            <Route path="/themes/:theme_id" element={<Theme />} />
+            {/* <Route
+              path="*"
+              element={
+                <Private>
+                  <Routes> */}
+                    <Route path="/home" element={<Home />} />
+                    
+                    {/* <Route path="/chat_rooms" element={<ChatRooms />} />
+                    <Route path="/chatroom/:id" element={<ChatRoom />} />
+                    <Route path="*" element={<NotFound />} /> */}
+                  {/* </Routes>
+                </Private>
+              }
+            /> */}
+          </Routes>
+        </CommonLayout>
+      </AuthContext.Provider>
+    </Router>
   )
 }
 

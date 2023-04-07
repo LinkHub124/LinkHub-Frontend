@@ -45,7 +45,7 @@ const Header: React.FC = () => {
         Cookies.remove("_uid")
 
         setIsSignedIn(false)
-        history("/signin")
+        history("/sign_in")
 
         console.log("Succeeded in sign out")
       } else {
@@ -74,7 +74,7 @@ const Header: React.FC = () => {
         return (
           <Button
             component={Link}
-            to="/signin"
+            to="/sign_in"
             color="inherit"
             className={classes.linkBtn}
           >
