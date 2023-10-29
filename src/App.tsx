@@ -12,7 +12,6 @@ import UserName from "components/pages/UserName"
 
 import { getCurrentUser } from "lib/api/auth"
 import { User } from "interfaces/user"
-import { execTest } from "lib/api/test"
 
 // グローバルで扱う変数・関数
 export const AuthContext = createContext({} as {
@@ -30,18 +29,6 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | undefined>()
   const [message, setMessage] = useState<string>("")
 
-  const handleExecTest = async () => {
-    const res = await execTest()
-
-    if (res.status === 200) {
-      setMessage(res.data.message)
-    }
-  }
-
-  useEffect(() => {
-    handleExecTest()
-  }, [])
-
   // 認証済みのユーザーがいるかどうかチェック
   // 確認できた場合はそのユーザーの情報を取得
   const handleGetCurrentUser = async () => {
@@ -52,6 +39,7 @@ const App: React.FC = () => {
       if (res?.status === 200) {
         setIsSignedIn(true)
         setCurrentUser(res?.data.currentUser)
+        console.log("handleGetCurrentUser")
       } else {
         console.log("No current user")
       }
@@ -64,6 +52,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     handleGetCurrentUser()
+    console.log("handleGetCurrentUser")
   }, [setCurrentUser])
 
 
@@ -90,7 +79,7 @@ const App: React.FC = () => {
             <Route path="/sign_in" element={<SignIn />} />
             
             <Route path="/themes" element={<Themes />} />
-            {/* <Route path="/home" element={<Home />} /> */}
+            <Route path="/home" element={<Home />} />
             <Route path="/:user_name" element={<UserName />} />
             <Route path="/:user_name/themes/:theme_id" element={<Theme />} />
             {/* <Route

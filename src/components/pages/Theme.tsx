@@ -29,7 +29,7 @@ const Themes: React.FC = () => {
   const parsedId = parseInt(theme_id as string, 10)
 
   const initialThemeState: Theme = {
-    id: 0,
+    themeId: 0,
     title: "",
     post_status: 0
   }

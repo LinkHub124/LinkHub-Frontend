@@ -14,19 +14,21 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 
 import AlertMessage from "components/utils/AlertMessage"
 
-import { getThemes } from "lib/api/themes"
-import { Theme } from "interfaces/theme"
+import { getThemes, postTheme } from "lib/api/themes"
+import { Theme, PostThemeRequest, PostThemeResponse } from "interfaces/theme"
+import { User } from "interfaces/user"
 
 import { AuthContext } from "App"
 
 import { Link } from 'react-router-dom';
 
-// ユーザー一覧ページ
+// テーマ一覧ページ
 const Themes: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
 
   const [loading, setLoading] = useState<boolean>(true)
   const [themes, setThemes] = useState<Theme[]>([])
+  const [themeTitle, setThemeTitle] = useState<string>("")
 //   const [user, setUser] = useState<User>(initialUserState)
 //   const [userDetailOpen, setUserDetailOpen] = useState<boolean>(false)
 //   const [likedUsers, setLikedUsers] = useState<User[]>([])
@@ -44,41 +46,31 @@ const Themes: React.FC = () => {
 //     return Math.floor((parseInt(today) - parseInt(birthday)) / 10000)
 //   }
 
-//   // 都道府県
-//   const userPrefecture = (): string => {
-//     return prefectures[(user.prefecture) - 1]
-//   }
 
-//   // いいね作成
-//   const handleCreateLike = async (user: User) => {
-//     const data: Like = {
-//       fromUserId: currentUser?.id,
-//       toUserId: user.id
-//     }
 
-//     try {
-//       const res = await createLike(data)
-//       console.log(res)
+  // テーマ作成
+  const handleCreateTheme = async () => {
+    const data: PostThemeRequest = {
+      title: themeTitle
+    }
 
-//       if (res?.status === 200) {
-//         setLikes([res.data.like, ...likes])
-//         setLikedUsers([user, ...likedUsers])
+    try {
+      const res = await postTheme(data)
+      console.log(res)
 
-//         console.log(res?.data.like)
-//       } else {
-//         console.log("Failed")
-//       }
+      if (res?.status === 200) {
+        console.log("OK")
+      } else {
+        console.log("Failed")
+      }
 
-//       if (res?.data.isMatched === true) {
-//         setAlertMessageOpen(true)
-//         setUserDetailOpen(false)
-//       }
-//     } catch (err) {
-//       console.log(err)
-//     }
-//   }
+      
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-  // ユーザー一覧を取得
+  // テーマ一覧を取得
   const handleGetThemes = async () => {
     try {
       const res = await getThemes()
@@ -93,7 +85,6 @@ const Themes: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
-
     setLoading(false)
   }
 
@@ -115,13 +106,7 @@ const Themes: React.FC = () => {
 
   useEffect(() => {
     handleGetThemes()
-    // handleGetLikes()
   }, [])
-
-//   // すでにいいねを押されているユーザーかどうかの判定
-//   const isLikedUser = (userId: number | undefined): boolean => {
-//     return likedUsers?.some((likedUser: User) => likedUser.id === userId)
-//   }
 
   return (
     <>
@@ -129,6 +114,13 @@ const Themes: React.FC = () => {
         !loading ? (
           themes?.length > 0 ? (
             <Grid container justify="center">
+              <input
+                type="text"
+                placeholder="テーマのタイトル"
+                value={themeTitle}
+                onChange={(e) => setThemeTitle(e.target.value)}
+              />
+              <button onClick={handleCreateTheme}>テーマを作成</button>
               {
                 themes?.map((theme: Theme, index: number) => {
                   return (
@@ -145,7 +137,7 @@ const Themes: React.FC = () => {
                           gutterBottom
                           style={{ marginTop: "0.5rem", textAlign: "center" }}
                         >
-                          <Link to={`/${theme.user?.name}/themes/${theme.id}`}>{theme.title} {theme.user?.name}</Link>
+                          <Link to={`/${theme.user?.name}/themes/${theme.themeId}`}>{theme.title} {theme.user?.name}</Link>
                         </Typography>
                       </Grid>
                     </div>  

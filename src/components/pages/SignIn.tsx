@@ -43,7 +43,7 @@ const SignIn: React.FC = () => {
   const classes = useStyles()
   const history = useNavigate()
 
-  const { setIsSignedIn, setCurrentUser } = useContext(AuthContext)
+  const { setIsSignedIn, currentUser, setCurrentUser } = useContext(AuthContext)
 
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
@@ -66,11 +66,14 @@ const SignIn: React.FC = () => {
         Cookies.set("_access_token", res.headers["access-token"])
         Cookies.set("_client", res.headers["client"])
         Cookies.set("_uid", res.headers["uid"])
+        console.log(Cookies.set("_uid", res.headers["uid"]))
 
         setIsSignedIn(true)
+        console.log(res.data.data)
         setCurrentUser(res.data.data)
+        console.log(currentUser)
 
-        history("/")
+        history("/home")
 
         console.log("Signed in successfully!")
       } else {
