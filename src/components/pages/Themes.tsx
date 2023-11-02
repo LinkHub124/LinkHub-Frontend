@@ -96,10 +96,9 @@ const Themes: React.FC = () => {
                 responseData?.map((theme: GetThemesResponse, index) => {
                   const updatedAtDate = new Date(theme.updatedAt);
                   const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
-
                   return (
                     <Grid item xs={12} key={index}>
-                      <Card>
+                      <Card className={`status-${theme.postStatus}`}>
                         <CardHeader
                           avatar={<Avatar alt="avatar" src={theme.user.image} />}
                           title={

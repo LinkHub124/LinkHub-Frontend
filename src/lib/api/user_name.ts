@@ -24,5 +24,11 @@ import Cookies from "js-cookie"
 
 // 全体公開のテーマを取得
 export const getUser = (user_name: string) => {
-  return client.get(`users/${user_name}`)
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  };
+
+  return client.get(`users/${user_name}`, { headers })
 }
