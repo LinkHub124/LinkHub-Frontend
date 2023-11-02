@@ -31,24 +31,6 @@ const Themes: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [responseData, setResponseData] = useState<GetThemesResponse[]>([])
   const [themeTitle, setThemeTitle] = useState<string>("")
-//   const [user, setUser] = useState<User>(initialUserState)
-//   const [userDetailOpen, setUserDetailOpen] = useState<boolean>(false)
-//   const [likedUsers, setLikedUsers] = useState<User[]>([])
-//   const [likes, setLikes] = useState<Like[]>([])
-//   const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false)
-
-//   // 生年月日から年齢を計算する 年齢 = floor((今日 - 誕生日) / 10000)
-//   const userAge = (): number | void => {
-//     const birthday = user.birthday.toString().replace(/-/g, "")
-//     if (birthday.length !== 8) return
-
-//     const date = new Date()
-//     const today = date.getFullYear() + ("0" + (date.getMonth() + 1)).slice(-2) + ("0" + date.getDate()).slice(-2)
-
-//     return Math.floor((parseInt(today) - parseInt(birthday)) / 10000)
-//   }
-
-
 
   // テーマ作成
   const handleCreateTheme = async () => {
