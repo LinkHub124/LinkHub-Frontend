@@ -8,7 +8,12 @@ export const getThemes = () => {
 }
 
 export const getTheme = (id: number) => {
-  return client.get(`themes/${id}`)
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  };
+  return client.get(`themes/${id}`, { headers })
 }
 
 export const postTheme = (data: PostThemeRequest) => {

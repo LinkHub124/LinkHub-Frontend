@@ -29,7 +29,7 @@ const Themes: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
 
   const [loading, setLoading] = useState<boolean>(true)
-  const [responseData, setResponseData] = useState<GetThemesResponse[]>([])
+  const [themes, setThemes] = useState<GetThemesResponse[]>([])
   const [themeTitle, setThemeTitle] = useState<string>("")
 
   // テーマ作成
@@ -60,8 +60,8 @@ const Themes: React.FC = () => {
       console.log(res)
 
       if (res?.status === 200) {
-        setResponseData(res?.data.themes)
-        console.log(responseData);
+        setThemes(res?.data.themes)
+        console.log(themes);
       } else {
         console.log("No Data")
       }
@@ -79,7 +79,7 @@ const Themes: React.FC = () => {
     <>
       {
         !loading ? (
-          responseData?.length > 0 ? (
+          themes?.length > 0 ? (
             <Grid container justify="center" spacing={2}>
               <Grid item xs={12}>
                 <input
@@ -93,7 +93,7 @@ const Themes: React.FC = () => {
                 <button onClick={handleCreateTheme}>テーマを作成</button>
               </Grid>
               {
-                responseData?.map((theme: GetThemesResponse, index) => {
+                themes?.map((theme: GetThemesResponse, index) => {
                   const updatedAtDate = new Date(theme.updatedAt);
                   const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
                   return (

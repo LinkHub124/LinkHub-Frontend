@@ -81,7 +81,7 @@ const App: React.FC = () => {
             <Route path="/themes" element={<Themes />} />
             <Route path="/home" element={<Home />} />
             <Route path="/:user_name" element={<UserName />} />
-            <Route path="/:user_name/themes/:theme_id" element={<Theme />} />
+            <Route path="/themes/:theme_id" element={<Theme />} />
             {/* <Route
               path="*"
               element={
