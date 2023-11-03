@@ -38,3 +38,8 @@ export interface GetThemeResponse {
 export interface PostThemeRequest {
   title: string
 }
+
+export interface PutThemeRequest {
+  title: string
+  postStatus: number
+}

@@ -1,6 +1,6 @@
 import client from "lib/api/client"
 import Cookies from "js-cookie"
-import { PostThemeRequest } from "interfaces/theme"
+import { PostThemeRequest, PutThemeRequest } from "interfaces/theme"
 
 // 全体公開のテーマを取得
 export const getThemes = () => {
@@ -12,7 +12,7 @@ export const getTheme = (id: number) => {
     "access-token": Cookies.get("_access_token"),
     "client": Cookies.get("_client"),
     "uid": Cookies.get("_uid"),
-  };
+  }
   return client.get(`themes/${id}`, { headers })
 }
 
@@ -21,7 +21,15 @@ export const postTheme = (data: PostThemeRequest) => {
     "access-token": Cookies.get("_access_token"),
     "client": Cookies.get("_client"),
     "uid": Cookies.get("_uid"),
-  };
+  }
+  return client.post("themes", { theme: data }, { headers })
+}
 
-  return client.post("themes", { theme: data }, { headers });
-};
+export const putTheme = (id: number, data: PutThemeRequest) => {
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  }
+  return client.put(`themes/${id}`, { theme: data }, { headers })
+}
