@@ -23,5 +23,5 @@ export const postTheme = (data: PostThemeRequest) => {
     "uid": Cookies.get("_uid"),
   };
 
-  return client.post("themes", data, { headers });
+  return client.post("themes", { theme: data }, { headers });
 };

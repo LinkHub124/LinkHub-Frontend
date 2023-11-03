@@ -16,7 +16,6 @@ import AlertMessage from "components/utils/AlertMessage"
 
 import { getUser } from "lib/api/user_name"
 import { GetUserResponse } from "interfaces/user"
-import { User } from "interfaces/user"
 
 import { AuthContext } from "App"
 
@@ -82,7 +81,7 @@ const Themes: React.FC = () => {
                         />
                         <CardContent>
                           <Typography variant="body1" component="p">
-                            <Link to={`/${user.name}/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
+                            <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
                               {theme.title}
                             </Link>
                           </Typography>

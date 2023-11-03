@@ -18,7 +18,9 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 import AlertMessage from "components/utils/AlertMessage"
 
 import { getTheme } from "lib/api/themes"
+import { postLinkCollections } from "lib/api/link_collections"
 import { GetThemeResponse } from "interfaces/theme"
+import { PostLinkCollectionRequest, PostLinkCollectionRequestLink } from "interfaces/link_collection"
 
 import { AuthContext } from "App"
 
@@ -28,6 +30,8 @@ const Themes: React.FC = () => {
   const { theme_id } = useParams<{ theme_id: string }>()
   const parsedId = parseInt(theme_id as string, 10)
 
+  const [subtitle, setSubtitle] = useState<string>("")
+  const [links, setLinks] = useState<PostLinkCollectionRequestLink[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
   const initialThemeState: GetThemeResponse = {
@@ -58,6 +62,46 @@ const Themes: React.FC = () => {
     setLoading(false)
   }
 
+  // リンク集作成
+  const handleCreateLinkCollection = async () => {
+    const data: PostLinkCollectionRequest = {
+      subtitle: subtitle,
+      links: links
+    }
+
+    try {
+      const res = await postLinkCollections(parsedId, data)
+      console.log(res)
+
+      if (res?.status === 200) {
+        console.log("OK")
+      } else {
+        console.log("Failed")
+      }
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+
+
+  const handleCreateLink = () => {
+    setLinks([...links, { url: "" }]);
+  };
+
+  const handleRemoveLink = (index: number) => {
+    const updatedLinks = [...links];
+    updatedLinks.splice(index, 1);
+    setLinks(updatedLinks);
+  };
+
+  const handleLinkChange = (e: any, index: number) => {
+    const updatedLinks = [...links];
+    updatedLinks[index].url = e.target.value;
+    setLinks(updatedLinks);
+  };
+
   useEffect(() => {
     handleGetTheme()
   }, [])
@@ -67,6 +111,23 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <Grid container justify="center" spacing={2}>
+            {theme.title}
+            <div>
+              {links.map((link, index: number) => (
+                <div key={index}>
+                  <input
+                    type="text"
+                    placeholder="テーマのタイトル"
+                    name="aaa"
+                    value={link.url}
+                    onChange={(e) => handleLinkChange(e, index)}
+                  />
+                  <button onClick={() => handleRemoveLink(index)}>-</button>
+                </div>
+              ))}
+              <button onClick={handleCreateLink}>テーマを追加</button>
+              <button onClick={handleCreateLinkCollection}>保存</button>
+            </div>
             {
               theme.linkCollections?.map((linkCollection: any, index) => {
                 const updatedAtDate = new Date(theme.updatedAt);

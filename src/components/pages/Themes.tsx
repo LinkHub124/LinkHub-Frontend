@@ -17,8 +17,7 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 import AlertMessage from "components/utils/AlertMessage"
 
 import { getThemes, postTheme } from "lib/api/themes"
-import { GetThemesResponse, PostThemeRequest, PostThemeResponse } from "interfaces/theme"
-import { User } from "interfaces/user"
+import { GetThemesResponse, PostThemeRequest } from "interfaces/theme"
 
 import { AuthContext } from "App"
 
@@ -111,7 +110,7 @@ const Themes: React.FC = () => {
                         />
                         <CardContent>
                           <Typography variant="body1" component="p">
-                            <Link to={`/${theme.user.name}/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
+                            <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
                               {theme.title}
                             </Link>
                           </Typography>
@@ -128,6 +127,17 @@ const Themes: React.FC = () => {
               variant="body2"
               color="textSecondary"
             >
+              <Grid item xs={12}>
+                <input
+                  type="text"
+                  placeholder="テーマのタイトル"
+                  value={themeTitle}
+                  onChange={(e) => setThemeTitle(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <button onClick={handleCreateTheme}>テーマを作成</button>
+              </Grid>
               まだ1つも投稿がありません。
             </Typography>
           )
