@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react"
 
 import { makeStyles } from "@material-ui/core/styles"
 import { Grid, Typography } from "@material-ui/core"
-import { Card, CardContent, CardHeader } from '@material-ui/core';
+import { Card, CardContent, CardHeader } from '@material-ui/core'
 import { useParams } from "react-router-dom"
 import Box from "@material-ui/core/Box"
 
@@ -18,7 +18,7 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 import AlertMessage from "components/utils/AlertMessage"
 
 import { getTheme } from "lib/api/themes"
-import { postLinkCollections } from "lib/api/link_collections"
+import { postLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
 import { GetThemeResponse } from "interfaces/theme"
 import { PostLinkCollectionRequest, PostLinkCollectionRequestLink } from "interfaces/link_collection"
 
@@ -75,8 +75,8 @@ const Themes: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("OK")
-        handleGetTheme();
-        setLinks([]);
+        handleGetTheme()
+        setLinks([])
       } else {
         console.log("Failed")
       }
@@ -86,23 +86,41 @@ const Themes: React.FC = () => {
     }
   }
 
+  // リンク集削除
+  const handleDeleteLinkCollection = async (linkCollectionId: number) => {
+    try {
+      const res = await deleteLinkCollections(parsedId, linkCollectionId)
+      console.log(res)
 
+      if (res?.status === 200) {
+        console.log("OK")
+        handleGetTheme()
+      } else {
+        console.log("Failed")
+      }
 
-  const handleCreateLink = () => {
-    setLinks([...links, { url: "" }]);
-  };
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-  const handleRemoveLink = (index: number) => {
-    const updatedLinks = [...links];
-    updatedLinks.splice(index, 1);
-    setLinks(updatedLinks);
-  };
+  // リンクフォーム追加
+  const handleCreateLinkForm = () => {
+    setLinks([...links, { url: "" }])
+  }
+
+  // リンクフォーム削除
+  const handleDeleteLinkForm = (index: number) => {
+    const updatedLinks = [...links]
+    updatedLinks.splice(index, 1)
+    setLinks(updatedLinks)
+  }
 
   const handleLinkChange = (e: any, index: number) => {
-    const updatedLinks = [...links];
-    updatedLinks[index].url = e.target.value;
-    setLinks(updatedLinks);
-  };
+    const updatedLinks = [...links]
+    updatedLinks[index].url = e.target.value
+    setLinks(updatedLinks)
+  }
 
   useEffect(() => {
     handleGetTheme()
@@ -115,7 +133,7 @@ const Themes: React.FC = () => {
           <Grid container justify="center" spacing={2}>
             {theme.title}
             <div>
-              {links.map((link, index: number) => (
+              {links.map((link: PostLinkCollectionRequestLink, index: number) => (
                 <div key={index}>
                   <input
                     type="text"
@@ -124,16 +142,16 @@ const Themes: React.FC = () => {
                     value={link.url}
                     onChange={(e) => handleLinkChange(e, index)}
                   />
-                  <button onClick={() => handleRemoveLink(index)}>-</button>
+                  <button onClick={() => handleDeleteLinkForm(index)}>-</button>
                 </div>
               ))}
-              <button onClick={handleCreateLink}>テーマを追加</button>
-              <button onClick={handleCreateLinkCollection}>保存</button>
+              <Button onClick={handleCreateLinkForm}>テーマを追加</Button>
+              <Button onClick={handleCreateLinkCollection}>保存</Button>
             </div>
             {
               theme.linkCollections?.map((linkCollection: any, index) => {
-                const updatedAtDate = new Date(theme.updatedAt);
-                const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
+                const updatedAtDate = new Date(theme.updatedAt)
+                const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
                 return (
                   <Grid item xs={8} key={index}>
                     <Card>
@@ -145,6 +163,7 @@ const Themes: React.FC = () => {
                         }
                       />
                       <CardContent>
+                        <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
                         <Typography variant="body2" component="p">
                         {
                           linkCollection.links.map((link: any) => {
@@ -160,14 +179,14 @@ const Themes: React.FC = () => {
                                   </div>
                                 </a>
                               </div>
-                            );
+                            )
                           })
                         }
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                );
+                )
               })
             }
           </Grid>

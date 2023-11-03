@@ -23,6 +23,7 @@ export interface GetThemeResponse {
     image: string
   }
   linkCollections?: {
+    linkCollectionId: number
     subtitle: string
     links: {
       url: string
