@@ -75,6 +75,8 @@ const Themes: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("OK")
+        handleGetTheme();
+        setLinks([]);
       } else {
         console.log("Failed")
       }
