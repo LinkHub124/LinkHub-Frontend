@@ -38,3 +38,12 @@ export const putTheme = (id: number, data: PutThemeRequest) => {
   }
   return client.put(`themes/${id}`, { theme: data }, { headers })
 }
+
+export const deleteTheme = (id: number) => {
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  }
+  return client.delete(`themes/${id}`, { headers })
+}

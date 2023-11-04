@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext } from "react"
 
 import { makeStyles } from "@material-ui/core/styles"
 import { Grid, Typography } from "@material-ui/core"
-import { Card, CardContent, CardHeader } from '@material-ui/core';
+import { Card, CardContent, CardHeader } from '@material-ui/core'
+import { useNavigate } from 'react-router-dom'
 
 
 import Dialog from "@material-ui/core/Dialog"
@@ -32,6 +33,8 @@ const Themes: React.FC = () => {
   const [themes, setThemes] = useState<GetThemesResponse[]>([])
   const [themeTitle, setThemeTitle] = useState<string>("")
 
+  const navigate = useNavigate()
+
   // テーマ作成
   const handleCreateTheme = async () => {
     const data: PostThemeRequest = {
@@ -44,6 +47,8 @@ const Themes: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("OK")
+        const id = res?.data.theme.themeId
+        navigate(`/themes/${id}`)
       } else {
         console.log("Failed")
       }

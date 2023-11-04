@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@material-ui/core'
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { useParams } from "react-router-dom"
+import { useNavigate } from 'react-router-dom'
 import Box from "@material-ui/core/Box"
 
 import Dialog from "@material-ui/core/Dialog"
@@ -19,7 +20,7 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 
 import AlertMessage from "components/utils/AlertMessage"
 
-import { getTheme, putTheme } from "lib/api/themes"
+import { getTheme, putTheme, deleteTheme } from "lib/api/themes"
 import { postLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
 import { GetThemeResponse, PutThemeRequest } from "interfaces/theme"
 import { PostLinkCollectionRequest, PostLinkCollectionRequestLink } from "interfaces/link_collection"
@@ -51,6 +52,9 @@ const Themes: React.FC = () => {
   const [postStatus, setPostStatus] = useState<string>("Private")
 
   const postStatusOptions: string[] = ['Private', 'Limited', 'Public']
+
+  const navigate = useNavigate()
+  
 
   const handleTitleClick = () => {
     setIsEditing(true)
@@ -84,7 +88,7 @@ const Themes: React.FC = () => {
     setLoading(false)
   }
 
-  // テーマの詳細情報を取得
+  // テーマの詳細情報を更新
   const handleUpdateTheme = async () => {
     const data: PutThemeRequest = {
       title: title,
@@ -97,6 +101,26 @@ const Themes: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("Updated")
+      } else {
+        console.log("No themes")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+
+    setLoading(false)
+    setIsEditing(false);
+  }
+
+  // テーマ削除
+  const handleDestroyTheme = async () => {
+    try {
+      const res = await deleteTheme(parsedId)
+      console.log(res)
+
+      if (res?.status === 200) {
+        console.log("Deleted")
+        navigate(-1)
       } else {
         console.log("No themes")
       }
@@ -197,6 +221,9 @@ const Themes: React.FC = () => {
             ) : (
               <h1 onClick={handleTitleClick}>{title}</h1>
             )}
+            <div>
+              <Button onClick={handleDestroyTheme}>テーマを削除</Button>
+            </div>
             <div>
               {links.map((link: PostLinkCollectionRequestLink, index: number) => (
                 <div key={index}>
