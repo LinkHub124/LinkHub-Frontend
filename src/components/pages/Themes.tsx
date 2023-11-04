@@ -17,7 +17,7 @@ import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
 import AlertMessage from "components/utils/AlertMessage"
 
 import { getThemes, postTheme } from "lib/api/themes"
-import { postFavorite } from "lib/api/favorites"
+import { postFavorite, deleteFavorite } from "lib/api/favorites"
 import { GetThemesResponse, PostThemeRequest } from "interfaces/theme"
 
 import { AuthContext } from "App"
@@ -89,6 +89,25 @@ const Themes: React.FC = () => {
     }
   }
 
+  // いいね削除
+  const handleDeleteFavorite = async (themeId: number) => {
+    try {
+      const res = await deleteFavorite(themeId)
+      console.log(res)
+
+      if (res?.status === 200) {
+        console.log("OK")
+        handleGetThemes()
+      } else {
+        console.log("Failed")
+      }
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+
   useEffect(() => {
     handleGetThemes()
   }, [])
@@ -134,7 +153,7 @@ const Themes: React.FC = () => {
                             </Link>
                             {currentUser ? (
                               theme.favorite ? (
-                                <Button onClick={() => handleCreateFavorite(theme.themeId)}>いいね削除</Button>
+                                <Button onClick={() => handleDeleteFavorite(theme.themeId)}>いいね削除</Button>
                               ) : (
                                 <Button onClick={() => handleCreateFavorite(theme.themeId)}>いいねする</Button>
                               )

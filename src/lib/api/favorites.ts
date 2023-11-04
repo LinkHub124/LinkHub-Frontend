@@ -10,3 +10,13 @@ export const postFavorite = (themeId: number) => {
   console.log(headers)
   return client.post(`themes/${themeId}/favorites`, {}, { headers })
 }
+
+export const deleteFavorite = (themeId: number) => {
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  }
+  console.log(headers)
+  return client.delete(`themes/${themeId}/favorites`, { headers })
+}
