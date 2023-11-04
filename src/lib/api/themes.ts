@@ -4,7 +4,12 @@ import { PostThemeRequest, PutThemeRequest } from "interfaces/theme"
 
 // 全体公開のテーマを取得
 export const getThemes = () => {
-  return client.get("themes")
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  }
+  return client.get("themes", { headers })
 }
 
 export const getTheme = (id: number) => {

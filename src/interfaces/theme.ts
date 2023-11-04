@@ -9,6 +9,7 @@ export interface GetThemesResponse {
     name: string
     image: string
   }
+  favorite?: boolean
 }
 
 export interface GetThemeResponse {
