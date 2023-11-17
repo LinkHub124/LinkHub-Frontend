@@ -2,21 +2,20 @@ import React, { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import Cookies from "js-cookie"
 
-import { makeStyles, Theme } from "@material-ui/core/styles"
-import TextField from "@material-ui/core/TextField"
-import Card from "@material-ui/core/Card"
-import CardContent from "@material-ui/core/CardContent"
-import CardHeader from "@material-ui/core/CardHeader"
-import Button from "@material-ui/core/Button"
+import { makeStyles } from "@mui/styles"
+import TextField from "@mui/material/TextField"
+import Card from "@mui/material/Card"
+import CardContent from "@mui/material/CardContent"
+import CardHeader from "@mui/material/CardHeader"
+import Button from "@mui/material/Button"
 
 import { AuthContext } from "App"
 import AlertMessage from "components/utils/AlertMessage"
 import { signUp } from "lib/api/auth"
 import { SignUpData } from "interfaces/index"
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   submitBtn: {
-    paddingTop: theme.spacing(2),
     textAlign: "right",
     flexGrow: 1,
     textTransform: "none"
@@ -25,7 +24,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     textAlign: "center"
   },
   card: {
-    padding: theme.spacing(2),
     maxWidth: 400
   }
 }))

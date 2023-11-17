@@ -9,7 +9,10 @@ export interface GetThemesResponse {
     name: string
     image: string
   }
-  favorite?: boolean
+  favorite: {
+    hasFavorite?: boolean
+    favoriteCount: number
+  }
 }
 
 export interface GetThemeResponse {

@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useContext } from "react"
 
-import { makeStyles } from "@material-ui/core/styles"
-import { Grid, Typography } from "@material-ui/core"
-import { Card, CardContent, CardHeader } from '@material-ui/core'
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import { makeStyles } from "@mui/material/styles"
+import { Grid, Typography } from "@mui/material"
+import { Card, CardContent, CardHeader } from '@mui/material'
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { useParams } from "react-router-dom"
 import { useNavigate } from 'react-router-dom'
-import Box from "@material-ui/core/Box"
+import Box from "@mui/material/Box"
 
-import Dialog from "@material-ui/core/Dialog"
-import DialogContent from "@material-ui/core/DialogContent"
+import Dialog from "@mui/material/Dialog"
+import DialogContent from "@mui/material/DialogContent"
 
-import Avatar from "@material-ui/core/Avatar"
-import Button from "@material-ui/core/Button"
-import Divider from "@material-ui/core/Divider"
-import FavoriteIcon from "@material-ui/icons/Favorite"
-import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
+import Avatar from "@mui/material/Avatar"
+import Button from "@mui/material/Button"
+import Divider from "@mui/material/Divider"
 
 import AlertMessage from "components/utils/AlertMessage"
 
@@ -200,31 +198,31 @@ const Themes: React.FC = () => {
     <>
       {
         !loading ? (
-          <Grid container justify="center" spacing={2}>
-            {isEditing ? (
-              <>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={handleTitleChange}
-                />
-                <Select
-                  value={postStatus}
-                  onChange={handlePostStatusChange}
-                >
-                  <MenuItem value="Private">Private</MenuItem>
-                  <MenuItem value="Limited">Limited</MenuItem>
-                  <MenuItem value="Public">Public</MenuItem>
-                </Select>
-                <Button onClick={handleUpdateTheme}>保存</Button>
-              </>
-            ) : (
-              <h1 onClick={handleTitleClick}>{title}</h1>
-            )}
-            <div>
-              <Button onClick={handleDestroyTheme}>テーマを削除</Button>
-            </div>
-            <div>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              {/* 投稿内容を左側に配置 */}
+              {isEditing ? (
+                <>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={handleTitleChange}
+                  />
+                  <Select
+                    value={postStatus}
+                    onChange={handlePostStatusChange}
+                  >
+                    <MenuItem value="Private">Private</MenuItem>
+                    <MenuItem value="Limited">Limited</MenuItem>
+                    <MenuItem value="Public">Public</MenuItem>
+                  </Select>
+                  <Button onClick={handleUpdateTheme}>保存</Button>
+                </>
+              ) : (
+                <h1 onClick={handleTitleClick}>{title}</h1>
+              )}
+            </Grid>
+            <Button onClick={handleDestroyTheme}>テーマを削除</Button>
               {links.map((link: PostLinkCollectionRequestLink, index: number) => (
                 <div key={index}>
                   <input
@@ -237,50 +235,49 @@ const Themes: React.FC = () => {
                   <button onClick={() => handleDeleteLinkForm(index)}>-</button>
                 </div>
               ))}
-              <Button onClick={handleCreateLinkForm}>テーマを追加</Button>
+              <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
               <Button onClick={handleCreateLinkCollection}>保存</Button>
-            </div>
-            {
-              theme.linkCollections?.map((linkCollection: any, index) => {
-                const updatedAtDate = new Date(theme.updatedAt)
-                const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
-                return (
-                  <Grid item xs={8} key={index}>
-                    <Card>
-                      <CardHeader
-                        title={
-                          <Typography variant="body1" component="p" gutterBottom>
-                            LinkCollection: {linkCollection.subtitle}
+              {
+                theme.linkCollections?.map((linkCollection: any, index) => {
+                  const updatedAtDate = new Date(theme.updatedAt)
+                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
+                  return (
+                    <Grid item xs={12} key={index}>
+                      <Card>
+                        <CardHeader
+                          title={
+                            <Typography variant="body1" component="p" gutterBottom>
+                              LinkCollection: {linkCollection.subtitle}
+                            </Typography>
+                          }
+                        />
+                        <CardContent>
+                          <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
+                          <Typography variant="body2" component="p">
+                          {
+                            linkCollection.links.map((link: any) => {
+                              return (
+                                <div>
+                                  <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '300px' }}>
+                                      {link.urlImage && (
+                                        <img src={link.urlImage} alt={link.urlTitle} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
+                                      )}
+                                      <h3>{link.urlTitle}</h3>
+                                      <p>{link.urlDescription}</p>
+                                    </div>
+                                  </a>
+                                </div>
+                              )
+                            })
+                          }
                           </Typography>
-                        }
-                      />
-                      <CardContent>
-                        <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
-                        <Typography variant="body2" component="p">
-                        {
-                          linkCollection.links.map((link: any) => {
-                            return (
-                              <div>
-                                <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                                  <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '300px' }}>
-                                    {link.urlImage && (
-                                      <img src={link.urlImage} alt={link.urlTitle} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
-                                    )}
-                                    <h3>{link.urlTitle}</h3>
-                                    <p>{link.urlDescription}</p>
-                                  </div>
-                                </a>
-                              </div>
-                            )
-                          })
-                        }
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                )
-              })
-            }
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  )
+                })
+              }
           </Grid>
         ) : (
           <></>

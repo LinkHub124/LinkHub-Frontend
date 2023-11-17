@@ -1,19 +1,29 @@
 import React, { useState, useEffect, useContext } from "react"
 
-import { makeStyles } from "@material-ui/core/styles"
-import { Grid, Typography } from "@material-ui/core"
-import { Card, CardContent, CardHeader } from '@material-ui/core'
+import { makeStyles } from "@mui/material"
+import { Grid, Typography } from "@mui/material"
+import { Card, CardContent, CardHeader } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 
-import Dialog from "@material-ui/core/Dialog"
-import DialogContent from "@material-ui/core/DialogContent"
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
 
-import Avatar from "@material-ui/core/Avatar"
-import Button from "@material-ui/core/Button"
-import Divider from "@material-ui/core/Divider"
-import FavoriteIcon from "@material-ui/icons/Favorite"
-import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
+import Favorite from '@mui/icons-material/Favorite';
+import Switch from '@mui/material/Switch';
+
+
+import Chip from '@mui/material/Chip';
+import LocationOn from '@mui/icons-material/LocationOn';
+
+import { grey } from '@mui/material/colors';
+
+
+import { Dialog } from "@mui/material"
+import { DialogContent } from "@mui/material"
+
+import { Avatar, Button, Divider } from "@mui/material"
 
 import AlertMessage from "components/utils/AlertMessage"
 
@@ -24,6 +34,50 @@ import { GetThemesResponse, PostThemeRequest } from "interfaces/theme"
 import { AuthContext } from "App"
 
 import { Link } from 'react-router-dom';
+
+
+
+
+
+export interface ThemeCardType {
+  index: number
+  theme: GetThemesResponse
+  formattedDate: string
+  currentUser: any
+  handleDeleteFavorite: any
+  handleCreateFavorite: any
+}
+
+
+const ThemeCard: React.FC<ThemeCardType> = ({ index, theme, formattedDate, currentUser, handleDeleteFavorite, handleCreateFavorite }) => {
+  return(
+    <Box sx={{ p: 2, display: 'flex' }} className={`status-${theme.postStatus}`} key={index}>
+      <Avatar variant="rounded" src={theme.user.image} sx={{ marginRight: '10px' }} />
+      <Stack spacing={0.5}>
+        <Typography sx={{ fontWeight: 'bold', fontFamily: 'san-serif' }}>
+          <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
+          {theme.title}
+          </Link>
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {theme.user.name} {formattedDate}
+        </Typography>
+      </Stack>
+      {currentUser ? (
+        theme.favorite.hasFavorite ? (
+          <IconButton size="small" onClick={() => handleDeleteFavorite(theme.themeId)}>
+            <Favorite fontSize="small" />
+          </IconButton>
+        ) : (
+          <IconButton size="small" onClick={() => handleCreateFavorite(theme.themeId)}>
+            <Favorite fontSize="small" />
+          </IconButton>
+        )
+      ) : null}
+    </Box>
+  );
+};
+
 
 // テーマ一覧ページ
 const Themes: React.FC = () => {
@@ -122,7 +176,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           themes?.length > 0 ? (
-            <Grid container justify="center" spacing={2}>
+            <Grid container justifyContent="center" alignItems="center" spacing={2}>
               <Grid item xs={12}>
                 <input
                   type="text"
@@ -134,42 +188,28 @@ const Themes: React.FC = () => {
               <Grid item xs={12}>
                 <button onClick={handleCreateTheme}>テーマを作成</button>
               </Grid>
-              {
-                themes?.map((theme: GetThemesResponse, index) => {
-                  const updatedAtDate = new Date(theme.updatedAt);
-                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
-                  return (
-                    <Grid item xs={12} key={index}>
-                      <Card className={`status-${theme.postStatus}`}>
-                        <CardHeader
-                          avatar={<Avatar alt="avatar" src={theme.user.image} />}
-                          title={
-                            <Typography variant="body2" component="p" gutterBottom>
-                              <Link to={`/${theme.user.name}`} style={{ color: 'black', textDecoration: 'none' }}>
-                                {theme.user.name} {formattedDate}
-                              </Link>
-                            </Typography>
-                          }
+              <Card>
+                {
+                  themes?.map((theme: GetThemesResponse, index) => {
+                    const updatedAtDate = new Date(theme.updatedAt);
+                    const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
+                    return (
+                      <>
+                        {index > 0 && <Divider />}
+                        <ThemeCard 
+                          key={index}
+                          index={index}
+                          theme={theme}
+                          formattedDate={formattedDate}
+                          currentUser={currentUser}
+                          handleDeleteFavorite={handleDeleteFavorite}
+                          handleCreateFavorite={handleCreateFavorite}
                         />
-                        <CardContent>
-                          <Typography variant="body1" component="p">
-                            <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
-                              {theme.title}
-                            </Link>
-                            {currentUser ? (
-                              theme.favorite ? (
-                                <Button onClick={() => handleDeleteFavorite(theme.themeId)}>いいね削除</Button>
-                              ) : (
-                                <Button onClick={() => handleCreateFavorite(theme.themeId)}>いいねする</Button>
-                              )
-                            ) : null}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  );
-                })
-              }
+                      </>
+                    );
+                  })
+                }
+              </Card>
             </Grid>
           ) : (
             <Typography

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { hot } from "react-hot-loader/root";
 
 import CommonLayout from "components/layouts/CommonLayout"
 import Home from "components/pages/Home"

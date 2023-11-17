@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useContext } from "react"
 
-import { makeStyles } from "@material-ui/core/styles"
-import { Grid, Typography } from "@material-ui/core"
-import { Card, CardContent, CardHeader } from '@material-ui/core';
+import { makeStyles } from "@mui/material/styles"
+import { Grid, Typography } from "@mui/material"
+import { Card, CardContent, CardHeader } from '@mui/material';
 import { useParams } from "react-router-dom"
 import { Link } from 'react-router-dom';
 
-import Avatar from "@material-ui/core/Avatar"
-import Button from "@material-ui/core/Button"
-import Divider from "@material-ui/core/Divider"
-import FavoriteIcon from "@material-ui/icons/Favorite"
-import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder"
+import Avatar from "@mui/material/Avatar"
+import Button from "@mui/material/Button"
+import Divider from "@mui/material/Divider"
 
 import AlertMessage from "components/utils/AlertMessage"
 
@@ -58,7 +56,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <>
-            <Grid container justify="center" spacing={2}>
+            <Grid container spacing={2}>
               <Grid item xs={12}>
                 <p>ユーザー名: {user.name}</p>
               </Grid>
