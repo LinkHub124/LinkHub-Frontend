@@ -25,6 +25,98 @@ import { PostLinkCollectionRequest, PostLinkCollectionRequestLink } from "interf
 
 import { AuthContext } from "App"
 
+import { Link } from 'react-router-dom'
+
+export interface OgpLinkCardType {
+  link: any
+}
+
+const OgpLinkCard: React.FC<OgpLinkCardType> = ({ link }) => {
+  const getTld = (url: string) => {
+    let modifiedUrl = url;
+    const sz = url.length;
+  
+    if (url.startsWith('http://')) {
+      modifiedUrl = url.slice(7);
+    } else if (url.startsWith('https://')) {
+      modifiedUrl = url.slice(8);
+    }
+  
+    const idx = modifiedUrl.indexOf('/');
+    modifiedUrl = (idx !== -1) ? modifiedUrl.slice(0, idx) : modifiedUrl;
+  
+    return modifiedUrl;
+  };
+    
+  return(
+    <Link to={link.url} rel="nofollow noopener" target="_blank" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Box
+        className="one-link-card"
+        sx={{
+          backgroundColor: '#FFF', // bgColor の修正
+          width: '100%', // width の修正
+          border: '1px solid #E6E6E6', // border の修正
+          borderRadius: '4px', // border-radius の修正
+          marginBottom: '12px', // margin-bottom の修正
+          ':hover': {
+            backgroundColor: '#FFF',
+            width: '100%',
+            border: '1px solid #555',
+            borderRadius: '4px',
+          },
+        }}
+      >
+        <Box className="one-link-content" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box className="one-link-left" sx={{ flex: 1, padding: '16px' }}>
+            <Box component="strong" className="one-link-title" sx={{
+              display: '-webkit-box',
+              maxHeight: '3em',
+              overflow: 'hidden',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+            }}>{link.urlTitle}</Box>
+
+            <Box component="span" className="one-link-description" sx={{
+              display: '-webkit-box',
+              maxheight: '3em',
+              overflow: 'hidden',
+              color: '#6F7372',
+              wordBreak: 'break-all',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+            }}>
+              {link.urlDescription}
+            </Box>
+            <Box component="span" className="one-link-url" sx={{
+              display: '-webkit-box',
+              maxheight: '3em',
+              overflow: 'hidden',
+              color: '#6F7372',
+              wordBreak: 'break-all',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+            }}>
+              {getTld(link.url)}
+            </Box>
+          </Box>
+          <Box className="one-link-right one-link-image" sx={{
+            width: '225px',
+            height: '150px',
+            verticalAlign: 'middle', // キャメルケースに修正
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: '50%',
+            backgroundSize: 'cover',
+            borderLeft: '1px solid #e8eceb',
+            borderRadius: '0 3px 3px 0',
+            backgroundImage: `url(${link.urlImage})`, // テンプレート文字列を使用し、URLを正しく挿入
+            }}>
+          </Box>
+        </Box>
+      </Box>
+    </Link>
+  );
+};
+
 // ユーザー一覧ページ
 const Themes: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
@@ -257,18 +349,10 @@ const Themes: React.FC = () => {
                           {
                             linkCollection.links.map((link: any) => {
                               return (
-                                <div>
-                                  <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                                    <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '300px' }}>
-                                      {link.urlImage && (
-                                        <img src={link.urlImage} alt={link.urlTitle} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
-                                      )}
-                                      <h3>{link.urlTitle}</h3>
-                                      <p>{link.urlDescription}</p>
-                                    </div>
-                                  </a>
-                                </div>
-                              )
+                                <OgpLinkCard
+                                  link={link}
+                                />
+                              );
                             })
                           }
                           </Typography>
