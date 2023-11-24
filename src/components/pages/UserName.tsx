@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import Avatar from "@mui/material/Avatar"
 import Button from "@mui/material/Button"
 import Divider from "@mui/material/Divider"
+import Box from "@mui/material/Box"
 
 import AlertMessage from "components/utils/AlertMessage"
 
@@ -56,39 +57,53 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <p>ユーザー名: {user.name}</p>
+            <Grid container sx={{ width: 960 }}>
+              <Grid item xs={3}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Avatar variant="rounded" sx={{ m: 3, width: 100, height: 100 }} />
+                      <Typography>{user.name}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
               </Grid>
-              {
-                user.themes?.map((theme: any, index: number) => {
-                  const updatedAtDate = new Date(theme.updatedAt);
-                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
-                  return (
-                    <Grid item xs={12} key={index}>
-                      <Card className={`status-${theme.postStatus}`}>
-                        <CardHeader
-                          avatar={<Avatar alt="avatar" src={user.image} />}
-                          title={
-                            <Typography variant="body2" component="p" gutterBottom>
-                              <Link to={`/${user.name}`} style={{ color: 'black', textDecoration: 'none' }}>
-                                {user.name} {formattedDate}
+              <Grid item xs={1}></Grid>
+              <Grid item xs={8}>
+                {
+                  user.themes?.map((theme: any, index: number) => {
+                    const updatedAtDate = new Date(theme.updatedAt);
+                    const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
+                    return (
+                        <Card className={`status-${theme.postStatus}`}>
+                          <CardHeader
+                            avatar={<Avatar alt="avatar" src={user.image} />}
+                            title={
+                              <Typography variant="body2" component="p" gutterBottom>
+                                <Link to={`/${user.name}`} style={{ color: 'black', textDecoration: 'none' }}>
+                                  {user.name} {formattedDate}
+                                </Link>
+                              </Typography>
+                            }
+                          />
+                          <CardContent>
+                            <Typography variant="body1" component="p">
+                              <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
+                                {theme.title}
                               </Link>
                             </Typography>
-                          }
-                        />
-                        <CardContent>
-                          <Typography variant="body1" component="p">
-                            <Link to={`/themes/${theme.themeId}`} style={{ color: 'black', textDecoration: 'none' }}>
-                              {theme.title}
-                            </Link>
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  );
-                })
-              }
+                          </CardContent>
+                        </Card>
+                      
+                    );
+                  })
+                }
+              </Grid>
             </Grid>
           </>
         ) : (

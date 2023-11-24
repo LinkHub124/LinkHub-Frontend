@@ -11,6 +11,7 @@ import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 
 import Favorite from '@mui/icons-material/Favorite';
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Switch from '@mui/material/Switch';
 
 
@@ -60,7 +61,7 @@ const ThemeCard: React.FC<ThemeCardType> = ({ index, theme, formattedDate, curre
           </Link>
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {theme.user.name} {formattedDate}
+        <Link to={`/${theme.user.name}`} style={{ color: 'black', textDecoration: 'none' }}>{theme.user.name}</Link> {formattedDate}
         </Typography>
       </Stack>
       {currentUser ? (
@@ -70,7 +71,7 @@ const ThemeCard: React.FC<ThemeCardType> = ({ index, theme, formattedDate, curre
           </IconButton>
         ) : (
           <IconButton size="small" onClick={() => handleCreateFavorite(theme.themeId)}>
-            <Favorite fontSize="small" />
+            <FavoriteBorder fontSize="small" />
           </IconButton>
         )
       ) : null}
@@ -176,7 +177,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           themes?.length > 0 ? (
-            <Grid container justifyContent="center" alignItems="center" spacing={2}>
+            <Grid container justifyContent="center" sx={{ width: "100%" }}>
               <Grid item xs={12}>
                 <input
                   type="text"
@@ -188,13 +189,13 @@ const Themes: React.FC = () => {
               <Grid item xs={12}>
                 <button onClick={handleCreateTheme}>テーマを作成</button>
               </Grid>
-              <Card>
+              <Card sx={{ width: "100%" }}>
                 {
                   themes?.map((theme: GetThemesResponse, index) => {
                     const updatedAtDate = new Date(theme.updatedAt);
                     const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
                     return (
-                      <>
+                      <Grid xs={12}>
                         {index > 0 && <Divider />}
                         <ThemeCard 
                           key={index}
@@ -205,7 +206,7 @@ const Themes: React.FC = () => {
                           handleDeleteFavorite={handleDeleteFavorite}
                           handleCreateFavorite={handleCreateFavorite}
                         />
-                      </>
+                      </Grid>
                     );
                   })
                 }
@@ -217,6 +218,7 @@ const Themes: React.FC = () => {
               variant="body2"
               color="textSecondary"
             >
+              
               <Grid item xs={12}>
                 <input
                   type="text"

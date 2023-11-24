@@ -290,79 +290,83 @@ const Themes: React.FC = () => {
     <>
       {
         !loading ? (
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              {/* 投稿内容を左側に配置 */}
-              {isEditing ? (
-                <>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={handleTitleChange}
-                  />
-                  <Select
-                    value={postStatus}
-                    onChange={handlePostStatusChange}
-                  >
-                    <MenuItem value="Private">Private</MenuItem>
-                    <MenuItem value="Limited">Limited</MenuItem>
-                    <MenuItem value="Public">Public</MenuItem>
-                  </Select>
-                  <Button onClick={handleUpdateTheme}>保存</Button>
-                </>
-              ) : (
-                <h1 onClick={handleTitleClick}>{title}</h1>
-              )}
+          <>
+            <Grid container spacing={2} sx={{ bgColor: "blue" }}>
+              <Grid item xs={12}>
+                {/* 投稿内容を左側に配置 */}
+                {isEditing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={handleTitleChange}
+                    />
+                    <Select
+                      value={postStatus}
+                      onChange={handlePostStatusChange}
+                    >
+                      <MenuItem value="Private">Private</MenuItem>
+                      <MenuItem value="Limited">Limited</MenuItem>
+                      <MenuItem value="Public">Public</MenuItem>
+                    </Select>
+                    <Button onClick={handleUpdateTheme}>保存</Button>
+                  </>
+                ) : (
+                  <h1 onClick={handleTitleClick}>{title}</h1>
+                )}
+              </Grid>
             </Grid>
-            <Button onClick={handleDestroyTheme}>テーマを削除</Button>
-              {links.map((link: PostLinkCollectionRequestLink, index: number) => (
-                <div key={index}>
-                  <input
-                    type="text"
-                    placeholder="テーマのタイトル"
-                    name="aaa"
-                    value={link.url}
-                    onChange={(e) => handleLinkChange(e, index)}
-                  />
-                  <button onClick={() => handleDeleteLinkForm(index)}>-</button>
-                </div>
-              ))}
-              <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
-              <Button onClick={handleCreateLinkCollection}>保存</Button>
-              {
-                theme.linkCollections?.map((linkCollection: any, index) => {
-                  const updatedAtDate = new Date(theme.updatedAt)
-                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
-                  return (
-                    <Grid item xs={12} key={index}>
-                      <Card>
-                        <CardHeader
-                          title={
-                            <Typography variant="body1" component="p" gutterBottom>
-                              LinkCollection: {linkCollection.subtitle}
+            <Grid container spacing={2} sx={{ bgColor: "blue" }}>
+              <Button onClick={handleDestroyTheme}>テーマを削除</Button>
+                {links.map((link: PostLinkCollectionRequestLink, index: number) => (
+                  <div key={index}>
+                    <input
+                      type="text"
+                      placeholder="テーマのタイトル"
+                      name="aaa"
+                      value={link.url}
+                      onChange={(e) => handleLinkChange(e, index)}
+                    />
+                    <button onClick={() => handleDeleteLinkForm(index)}>-</button>
+                  </div>
+                ))}
+                <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
+                <Button onClick={handleCreateLinkCollection}>保存</Button>
+                {
+                  theme.linkCollections?.map((linkCollection: any, index) => {
+                    const updatedAtDate = new Date(theme.updatedAt)
+                    const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
+                    return (
+                      <Grid item xs={12} key={index}>
+                        <Card>
+                          <CardHeader
+                            title={
+                              <Typography variant="body1" component="p" gutterBottom>
+                                LinkCollection: {linkCollection.subtitle}
+                              </Typography>
+                            }
+                          />
+                          <CardContent>
+                            <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
+                            <Typography variant="body2" component="p">
+                            {
+                              linkCollection.links.map((link: any) => {
+                                return (
+                                  <OgpLinkCard
+                                    link={link}
+                                  />
+                                );
+                              })
+                            }
                             </Typography>
-                          }
-                        />
-                        <CardContent>
-                          <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
-                          <Typography variant="body2" component="p">
-                          {
-                            linkCollection.links.map((link: any) => {
-                              return (
-                                <OgpLinkCard
-                                  link={link}
-                                />
-                              );
-                            })
-                          }
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  )
-                })
-              }
-          </Grid>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )
+                  })
+                }
+            </Grid>
+          </>
         ) : (
           <></>
         )

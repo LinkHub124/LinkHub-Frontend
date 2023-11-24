@@ -8,6 +8,7 @@ import SignIn from "components/pages/SignIn"
 import Themes from "components/pages/Themes"
 import Theme from "components/pages/Theme"
 import UserName from "components/pages/UserName"
+import Test from "components/pages/Test"
 
 import { getCurrentUser } from "lib/api/auth"
 import { User } from "interfaces/user"
@@ -79,6 +80,7 @@ const App: React.FC = () => {
             
             <Route path="/" element={<Themes />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/testtest" element={<Test />} />
             <Route path="/:user_name" element={<UserName />} />
             <Route path="/themes/:theme_id" element={<Theme />} />
             {/* <Route
