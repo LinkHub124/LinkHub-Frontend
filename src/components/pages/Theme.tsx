@@ -131,6 +131,11 @@ const Themes: React.FC = () => {
     themeId: 0,
     title: "test_name",
     postStatus: 0,
+    user: {
+      userId: 0,
+      name: "test_name",
+      image: "test_image"
+    },
     createdAt: new Date("1990/01/01"),
     updatedAt: new Date("1990/01/01")
   }
@@ -147,6 +152,8 @@ const Themes: React.FC = () => {
   
 
   const handleTitleClick = () => {
+    if(currentUser == undefined) return
+    if(theme.user.userId != currentUser.id) return
     setIsEditing(true)
   }
 
@@ -317,54 +324,62 @@ const Themes: React.FC = () => {
               </Grid>
             </Grid>
             <Grid container spacing={2} sx={{ bgColor: "blue" }}>
-              <Button onClick={handleDestroyTheme}>テーマを削除</Button>
-                {links.map((link: PostLinkCollectionRequestLink, index: number) => (
-                  <div key={index}>
-                    <input
-                      type="text"
-                      placeholder="テーマのタイトル"
-                      name="aaa"
-                      value={link.url}
-                      onChange={(e) => handleLinkChange(e, index)}
-                    />
-                    <button onClick={() => handleDeleteLinkForm(index)}>-</button>
-                  </div>
-                ))}
-                <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
-                <Button onClick={handleCreateLinkCollection}>保存</Button>
-                {
-                  theme.linkCollections?.map((linkCollection: any, index) => {
-                    const updatedAtDate = new Date(theme.updatedAt)
-                    const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
-                    return (
-                      <Grid item xs={12} key={index}>
-                        <Card>
-                          <CardHeader
-                            title={
-                              <Typography variant="body1" component="p" gutterBottom>
-                                LinkCollection: {linkCollection.subtitle}
-                              </Typography>
-                            }
-                          />
-                          <CardContent>
-                            <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
-                            <Typography variant="body2" component="p">
-                            {
-                              linkCollection.links.map((link: any) => {
-                                return (
-                                  <OgpLinkCard
-                                    link={link}
-                                  />
-                                );
-                              })
-                            }
+              {
+                currentUser && currentUser.id == theme.user.userId ? (
+                  <>
+                    <Button onClick={handleDestroyTheme}>テーマを削除</Button>
+                    {links.map((link: PostLinkCollectionRequestLink, index: number) => (
+                      <div key={index}>
+                        <input
+                          type="text"
+                          placeholder="テーマのタイトル"
+                          name="aaa"
+                          value={link.url}
+                          onChange={(e) => handleLinkChange(e, index)}
+                        />
+                        <button onClick={() => handleDeleteLinkForm(index)}>-</button>
+                      </div>
+                    ))}
+                    <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
+                    <Button onClick={handleCreateLinkCollection}>保存</Button>
+                  </>
+                ) : (
+                  <></>
+                )
+              }
+              {
+                theme.linkCollections?.map((linkCollection: any, index) => {
+                  const updatedAtDate = new Date(theme.updatedAt)
+                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
+                  return (
+                    <Grid item xs={12} key={index}>
+                      <Card>
+                        <CardHeader
+                          title={
+                            <Typography variant="body1" component="p" gutterBottom>
+                              LinkCollection: {linkCollection.subtitle}
                             </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    )
-                  })
-                }
+                          }
+                        />
+                        <CardContent>
+                          <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
+                          <Typography variant="body2" component="p">
+                          {
+                            linkCollection.links.map((link: any) => {
+                              return (
+                                <OgpLinkCard
+                                  link={link}
+                                />
+                              );
+                            })
+                          }
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  )
+                })
+              }
             </Grid>
           </>
         ) : (

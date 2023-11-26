@@ -21,7 +21,7 @@ export interface GetThemeResponse {
   postStatus: number
   createdAt: Date
   updatedAt: Date
-  user?: {
+  user: {
     userId: number
     name: string
     image: string
