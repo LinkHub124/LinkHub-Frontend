@@ -6,6 +6,7 @@ import Home from "components/pages/Home"
 import SignUp from "components/pages/SignUp"
 import SignIn from "components/pages/SignIn"
 import Themes from "components/pages/Themes"
+import NewTheme from "components/pages/NewTheme"
 import Theme from "components/pages/Theme"
 import UserName from "components/pages/UserName"
 import Test from "components/pages/Test"
@@ -82,6 +83,7 @@ const App: React.FC = () => {
             <Route path="/home" element={<Home />} />
             <Route path="/testtest" element={<Test />} />
             <Route path="/:user_name" element={<UserName />} />
+            <Route path="/themes/new" element={<NewTheme />} />
             <Route path="/themes/:theme_id" element={<Theme />} />
             {/* <Route
               path="*"

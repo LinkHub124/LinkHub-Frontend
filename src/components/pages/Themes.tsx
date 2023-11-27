@@ -26,11 +26,9 @@ import { DialogContent } from "@mui/material"
 
 import { Avatar, Button, Divider } from "@mui/material"
 
-import AlertMessage from "components/utils/AlertMessage"
-
-import { getThemes, postTheme } from "lib/api/themes"
+import { getThemes } from "lib/api/themes"
 import { postFavorite, deleteFavorite } from "lib/api/favorites"
-import { GetThemesResponse, PostThemeRequest } from "interfaces/theme"
+import { GetThemesResponse } from "interfaces/theme"
 
 import { AuthContext } from "App"
 
@@ -86,32 +84,6 @@ const Themes: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(true)
   const [themes, setThemes] = useState<GetThemesResponse[]>([])
-  const [themeTitle, setThemeTitle] = useState<string>("")
-
-  const navigate = useNavigate()
-
-  // テーマ作成
-  const handleCreateTheme = async () => {
-    const data: PostThemeRequest = {
-      title: themeTitle
-    }
-
-    try {
-      const res = await postTheme(data)
-      console.log(res)
-
-      if (res?.status === 200) {
-        console.log("OK")
-        const id = res?.data.theme.themeId
-        navigate(`/themes/${id}`)
-      } else {
-        console.log("Failed")
-      }
-
-    } catch (err) {
-      console.log(err)
-    }
-  }
 
   // テーマ一覧を取得
   const handleGetThemes = async () => {
@@ -178,17 +150,6 @@ const Themes: React.FC = () => {
         !loading ? (
           themes?.length > 0 ? (
             <Grid container justifyContent="center" sx={{ width: "100%" }}>
-              <Grid item xs={12}>
-                <input
-                  type="text"
-                  placeholder="テーマのタイトル"
-                  value={themeTitle}
-                  onChange={(e) => setThemeTitle(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <button onClick={handleCreateTheme}>テーマを作成</button>
-              </Grid>
               <Card sx={{ width: "100%" }}>
                 {
                   themes?.map((theme: GetThemesResponse, index) => {
@@ -218,18 +179,6 @@ const Themes: React.FC = () => {
               variant="body2"
               color="textSecondary"
             >
-              
-              <Grid item xs={12}>
-                <input
-                  type="text"
-                  placeholder="テーマのタイトル"
-                  value={themeTitle}
-                  onChange={(e) => setThemeTitle(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <button onClick={handleCreateTheme}>テーマを作成</button>
-              </Grid>
               まだ1つも投稿がありません。
             </Typography>
           )

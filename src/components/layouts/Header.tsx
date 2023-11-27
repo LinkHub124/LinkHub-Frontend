@@ -59,13 +59,23 @@ const Header: React.FC = () => {
     if (!loading) {
       if (isSignedIn) {
         return (
-          <Button
-            color="inherit"
-            className={classes.linkBtn}
-            onClick={handleSignOut}
-          >
-            サインアウト
-          </Button>
+          <>
+            <Button
+              component={Link}
+              to="/themes/new"
+              color="inherit"
+              className={classes.linkBtn}
+            >
+              テーマ作成
+            </Button>
+            <Button
+              color="inherit"
+              className={classes.linkBtn}
+              onClick={handleSignOut}
+            >
+              サインアウト
+            </Button>
+          </>
         )
       } else {
         return (
