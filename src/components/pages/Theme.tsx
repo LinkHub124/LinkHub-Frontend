@@ -244,6 +244,7 @@ const Themes: React.FC = () => {
       if (res?.status === 200) {
         console.log("OK")
         handleGetTheme()
+        setSubtitle("")
         setLinks([])
       } else {
         console.log("Failed")
@@ -274,6 +275,11 @@ const Themes: React.FC = () => {
     }
   }
 
+  // リンク集のsubtitle修正
+  const handleLinkCollectionSubtitleChange = (e: any) => {
+    setSubtitle(e.target.value)
+  }
+
   // リンクフォーム追加
   const handleCreateLinkForm = () => {
     setLinks([...links, { url: "", description: "" }])
@@ -286,8 +292,8 @@ const Themes: React.FC = () => {
     setLinks(updatedLinks)
   }
 
-  // リンクフォームのlink修正
-  const handleLinkChange = (e: any, index: number) => {
+  // リンクフォームのurl修正
+  const handleLinkUrlChange = (e: any, index: number) => {
     const updatedLinks = [...links]
     updatedLinks[index].url = e.target.value
     setLinks(updatedLinks)
@@ -341,14 +347,24 @@ const Themes: React.FC = () => {
                     <Button onClick={handleUpdateTheme}>保存</Button>
                   </>
                 ) : (
-                  <h1 onClick={handleTitleClick}>{title}</h1>
+                  <>
+                    <h1 onClick={handleTitleClick}>{title}</h1>
+                  </>
                 )}
+                <br/>
               </Grid>
             </Grid>
-            <Grid container spacing={2} sx={{ bgColor: "blue" }}>
+            <Grid container spacing={2}>
               {
                 currentUser && currentUser.id == theme.user.userId ? (
                   <>
+                    <input
+                      type="text"
+                      placeholder="サブタイトル"
+                      name="subtitle"
+                      value={subtitle}
+                      onChange={(e) => handleLinkCollectionSubtitleChange(e)}
+                    />
                     <Button onClick={handleDestroyTheme}>テーマを削除</Button>
                     {links.map((link: PostLinkCollectionRequestLink, index: number) => (
                       <Grid item xs={12} key={index}>
@@ -357,7 +373,7 @@ const Themes: React.FC = () => {
                           placeholder="リンク"
                           name="url"
                           value={link.url}
-                          onChange={(e) => handleLinkChange(e, index)}
+                          onChange={(e) => handleLinkUrlChange(e, index)}
                         />
                         <input
                           type="text"
@@ -405,9 +421,14 @@ const Themes: React.FC = () => {
                             )
                           }
                           title={
-                            <Typography variant="body1" component="p" gutterBottom>
-                              LinkCollection: {linkCollection.linkCollectionId}
-                            </Typography>
+                            <>
+                              <Typography variant="body1" component="p" gutterBottom>
+                                LinkCollection: {linkCollection.linkCollectionId}
+                              </Typography>
+                              <Typography variant="body1" component="p" gutterBottom>
+                                Subtitle: {linkCollection.subtitle}
+                              </Typography>
+                            </>
                           }
                         />
                         <CardContent>
