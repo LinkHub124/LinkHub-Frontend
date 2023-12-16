@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from "react"
 
 import { makeStyles } from "@mui/material/styles"
 import { Grid, Typography } from "@mui/material"
-import { Card, CardContent, CardHeader } from '@mui/material'
+import { Card, CardContent, CardHeader, IconButton, Menu } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Select from '@mui/material/Select';
 import { useParams } from "react-router-dom"
 import { useNavigate } from 'react-router-dom'
@@ -255,6 +256,8 @@ const Themes: React.FC = () => {
 
   // リンク集削除
   const handleDeleteLinkCollection = async (linkCollectionId: number) => {
+    console.log("削除")
+    console.log(linkCollectionId)
     try {
       const res = await deleteLinkCollections(parsedId, linkCollectionId)
       console.log(res)
@@ -295,11 +298,21 @@ const Themes: React.FC = () => {
     setLinks(updatedLinks)
   }
 
-
-
   useEffect(() => {
     handleGetTheme()
   }, [])
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されている linkCollectionId を追跡
+
+  const handleClick = (event: any, id: number) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentLinkCollectionId(id); // クリックされた時点での linkCollectionId を保存
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <>
@@ -337,7 +350,7 @@ const Themes: React.FC = () => {
                   <>
                     <Button onClick={handleDestroyTheme}>テーマを削除</Button>
                     {links.map((link: PostLinkCollectionRequestLink, index: number) => (
-                      <div key={index}>
+                      <Grid item xs={12} key={index}>
                         <input
                           type="text"
                           placeholder="リンク"
@@ -353,7 +366,7 @@ const Themes: React.FC = () => {
                           onChange={(e) => handleLinkDescriptionChange(e, index)}
                         />
                         <button onClick={() => handleDeleteLinkForm(index)}>-</button>
-                      </div>
+                      </Grid>
                     ))}
                     <Button onClick={handleCreateLinkForm}>リンク集を追加</Button>
                     <Button onClick={handleCreateLinkCollection}>保存</Button>
@@ -364,33 +377,52 @@ const Themes: React.FC = () => {
               }
               {
                 theme.linkCollections?.map((linkCollection: any, index) => {
+                  console.log(linkCollection.linkCollectionId)
                   const updatedAtDate = new Date(theme.updatedAt)
                   const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
                   return (
-                    <Grid item xs={12} key={index}>
+                    <Grid item xs={12}>
                       <Card>
                         <CardHeader
+                          action={
+                            currentUser && currentUser.id === theme.user.userId && (
+                              <>
+                                <IconButton aria-label="settings" onClick={(e) => handleClick(e, linkCollection.linkCollectionId)}>
+                                  <MoreHorizIcon />
+                                </IconButton>
+                                <Menu
+                                  anchorEl={anchorEl}
+                                  open={Boolean(anchorEl)}
+                                  onClose={handleClose}
+                                >
+                                  <MenuItem onClick={() => {
+                                    handleClose();
+                                    handleDeleteLinkCollection(currentLinkCollectionId);
+                                  }}>削除</MenuItem>
+                                </Menu>
+                              </>
+                            )
+                          }
                           title={
                             <Typography variant="body1" component="p" gutterBottom>
-                              LinkCollection: {linkCollection.subtitle}
+                              LinkCollection: {linkCollection.linkCollectionId}
                             </Typography>
                           }
                         />
                         <CardContent>
-                          <Button onClick={() => handleDeleteLinkCollection(linkCollection.linkCollectionId)}>X</Button>
                           <Typography variant="body2" component="p">
-                          {
-                            linkCollection.links.map((link: any) => {
-                              return (
-                                <>
-                                  <OgpLinkCard
-                                    link={link}
-                                  />
-                                  <p>{link.description}</p>
-                                </>
-                              );
-                            })
-                          }
+                            {
+                              linkCollection.links.map((link: any) => {
+                                return (
+                                  <>
+                                    <OgpLinkCard
+                                      link={link}
+                                    />
+                                    <p>{link.description}</p>
+                                  </>
+                                );
+                              })
+                            }
                           </Typography>
                         </CardContent>
                       </Card>
