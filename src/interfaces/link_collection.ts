@@ -5,4 +5,5 @@ export interface PostLinkCollectionRequest {
 
 export interface PostLinkCollectionRequestLink {
   url: string
+  description: string
 }

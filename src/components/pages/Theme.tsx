@@ -273,7 +273,7 @@ const Themes: React.FC = () => {
 
   // リンクフォーム追加
   const handleCreateLinkForm = () => {
-    setLinks([...links, { url: "" }])
+    setLinks([...links, { url: "", description: "" }])
   }
 
   // リンクフォーム削除
@@ -289,6 +289,14 @@ const Themes: React.FC = () => {
     setLinks(updatedLinks)
   }
 
+  const handleLinkDescriptionChange = (e: any, index: number) => {
+    const updatedLinks = [...links]
+    updatedLinks[index].description = e.target.value
+    setLinks(updatedLinks)
+  }
+
+
+
   useEffect(() => {
     handleGetTheme()
   }, [])
@@ -298,7 +306,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <>
-            <Grid container spacing={2} sx={{ bgColor: "blue" }}>
+            <Grid container spacing={2} sx={{ width: 960 }}>
               <Grid item xs={12}>
                 {/* 投稿内容を左側に配置 */}
                 {isEditing ? (
@@ -332,10 +340,17 @@ const Themes: React.FC = () => {
                       <div key={index}>
                         <input
                           type="text"
-                          placeholder="テーマのタイトル"
-                          name="aaa"
+                          placeholder="リンク"
+                          name="url"
                           value={link.url}
                           onChange={(e) => handleLinkChange(e, index)}
+                        />
+                        <input
+                          type="text"
+                          placeholder="コメント"
+                          name="description"
+                          value={link.description}
+                          onChange={(e) => handleLinkDescriptionChange(e, index)}
                         />
                         <button onClick={() => handleDeleteLinkForm(index)}>-</button>
                       </div>
@@ -367,9 +382,12 @@ const Themes: React.FC = () => {
                           {
                             linkCollection.links.map((link: any) => {
                               return (
-                                <OgpLinkCard
-                                  link={link}
-                                />
+                                <>
+                                  <OgpLinkCard
+                                    link={link}
+                                  />
+                                  <p>{link.description}</p>
+                                </>
                               );
                             })
                           }

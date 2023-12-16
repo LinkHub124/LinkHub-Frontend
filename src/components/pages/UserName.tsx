@@ -57,7 +57,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <>
-            <Grid container sx={{ width: 960 }}>
+            <Grid container sx={{ width: 960, p: 5 }}>
               <Grid item xs={3}>
                 <Card>
                   <CardContent>
