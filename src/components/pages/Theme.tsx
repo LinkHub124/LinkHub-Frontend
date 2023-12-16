@@ -143,7 +143,7 @@ const Themes: React.FC = () => {
 
   const [theme, setTheme] = useState<GetThemeResponse>(initialThemeState)
 
-  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [isEditingTitle, setisEditingTitle] = useState<boolean>(false)
   const [title, setTitle] = useState<string>("")
   const [postStatus, setPostStatus] = useState<string>("Private")
 
@@ -155,7 +155,7 @@ const Themes: React.FC = () => {
   const handleTitleClick = () => {
     if(currentUser == undefined) return
     if(theme.user.userId != currentUser.id) return
-    setIsEditing(true)
+    setisEditingTitle(true)
   }
 
   const handleTitleChange = (e: any) => {
@@ -207,7 +207,7 @@ const Themes: React.FC = () => {
     }
 
     setLoading(false)
-    setIsEditing(false);
+    setisEditingTitle(false);
   }
 
   // テーマ削除
@@ -227,7 +227,7 @@ const Themes: React.FC = () => {
     }
 
     setLoading(false)
-    setIsEditing(false);
+    setisEditingTitle(false);
   }
 
   // リンク集作成
@@ -286,12 +286,14 @@ const Themes: React.FC = () => {
     setLinks(updatedLinks)
   }
 
+  // リンクフォームのlink修正
   const handleLinkChange = (e: any, index: number) => {
     const updatedLinks = [...links]
     updatedLinks[index].url = e.target.value
     setLinks(updatedLinks)
   }
 
+  // リンクフォームのdescription修正
   const handleLinkDescriptionChange = (e: any, index: number) => {
     const updatedLinks = [...links]
     updatedLinks[index].description = e.target.value
@@ -305,7 +307,7 @@ const Themes: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されている linkCollectionId を追跡
 
-  const handleClick = (event: any, id: number) => {
+  const handleMeatBallMenuClick = (event: any, id: number) => {
     setAnchorEl(event.currentTarget);
     setCurrentLinkCollectionId(id); // クリックされた時点での linkCollectionId を保存
   };
@@ -321,8 +323,7 @@ const Themes: React.FC = () => {
           <>
             <Grid container spacing={2} sx={{ width: 960 }}>
               <Grid item xs={12}>
-                {/* 投稿内容を左側に配置 */}
-                {isEditing ? (
+                {isEditingTitle ? (
                   <>
                     <input
                       type="text"
@@ -387,7 +388,7 @@ const Themes: React.FC = () => {
                           action={
                             currentUser && currentUser.id === theme.user.userId && (
                               <>
-                                <IconButton aria-label="settings" onClick={(e) => handleClick(e, linkCollection.linkCollectionId)}>
+                                <IconButton aria-label="settings" onClick={(e) => handleMeatBallMenuClick(e, linkCollection.linkCollectionId)}>
                                   <MoreHorizIcon />
                                 </IconButton>
                                 <Menu
