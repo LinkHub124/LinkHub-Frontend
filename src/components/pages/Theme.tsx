@@ -20,9 +20,9 @@ import Divider from "@mui/material/Divider"
 import AlertMessage from "components/utils/AlertMessage"
 
 import { getTheme, putTheme, deleteTheme } from "lib/api/themes"
-import { postLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
+import { postLinkCollections, putLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
 import { GetThemeResponse, PutThemeRequest } from "interfaces/theme"
-import { PostLinkCollectionRequest, PostLinkCollectionRequestLink } from "interfaces/link_collection"
+import { PostLinkCollectionRequest, PostLinkCollectionRequestLink, PutLinkCollectionRequest } from "interfaces/link_collection"
 
 import { AuthContext } from "App"
 
@@ -143,7 +143,7 @@ const Themes: React.FC = () => {
 
   const [theme, setTheme] = useState<GetThemeResponse>(initialThemeState)
 
-  const [isEditingTitle, setisEditingTitle] = useState<boolean>(false)
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
   const [title, setTitle] = useState<string>("")
   const [postStatus, setPostStatus] = useState<string>("Private")
 
@@ -155,7 +155,7 @@ const Themes: React.FC = () => {
   const handleTitleClick = () => {
     if(currentUser == undefined) return
     if(theme.user.userId != currentUser.id) return
-    setisEditingTitle(true)
+    setIsEditingTitle(true)
   }
 
   const handleTitleChange = (e: any) => {
@@ -176,6 +176,7 @@ const Themes: React.FC = () => {
         setTheme(res?.data.theme)
         setTitle(res?.data.theme.title)
         setPostStatus(postStatusOptions[res?.data.theme.postStatus])
+        updateEditStates()
       } else {
         console.log("No themes")
       }
@@ -207,7 +208,7 @@ const Themes: React.FC = () => {
     }
 
     setLoading(false)
-    setisEditingTitle(false);
+    setIsEditingTitle(false);
   }
 
   // テーマ削除
@@ -227,7 +228,7 @@ const Themes: React.FC = () => {
     }
 
     setLoading(false)
-    setisEditingTitle(false);
+    setIsEditingTitle(false);
   }
 
   // リンク集作成
@@ -255,10 +256,31 @@ const Themes: React.FC = () => {
     }
   }
 
+  // リンク集更新
+  const handleUpdateLinkCollection = async (linkCollectionId: number) => {
+    const data: PutLinkCollectionRequest = {
+      subtitle: subtitle,
+      links: links
+    }
+
+    try {
+      const res = await putLinkCollections(parsedId, linkCollectionId, data)
+      console.log(res)
+
+      if (res?.status === 200) {
+        console.log("OK")
+        handleGetTheme()
+      } else {
+        console.log("Failed")
+      }
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   // リンク集削除
   const handleDeleteLinkCollection = async (linkCollectionId: number) => {
-    console.log("削除")
-    console.log(linkCollectionId)
     try {
       const res = await deleteLinkCollections(parsedId, linkCollectionId)
       console.log(res)
@@ -320,6 +342,41 @@ const Themes: React.FC = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const initializeEditStateDict = () => {
+    const editStateDict: { [key: number]: boolean } = {};
+    theme.linkCollections?.map((linkCollection: any) => {
+      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
+    })
+    return editStateDict;
+  };
+  
+  const [editStates, setEditStates] = useState(initializeEditStateDict());
+
+  // 編集状態の切り替え関数
+  const toggleEditState = (id: number, flag: boolean) => {
+    setEditStates(prevEditStates => ({
+      ...prevEditStates,
+      [id]: flag
+    }));
+  };
+
+  const updateEditStates = () => {
+    const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
+  
+    setEditStates((prevEditStates) => {
+      const newEditStates = { ...prevEditStates };
+  
+      // 不要なキーを削除
+      Object.keys(newEditStates).forEach(key => {
+        if (!linkCollectionIds.includes(key)) {
+          delete newEditStates[parseInt(key, 10)];
+        }
+      });
+  
+      return newEditStates;
+    });
   };
 
   return (
@@ -394,7 +451,6 @@ const Themes: React.FC = () => {
               }
               {
                 theme.linkCollections?.map((linkCollection: any, index) => {
-                  console.log(linkCollection.linkCollectionId)
                   const updatedAtDate = new Date(theme.updatedAt)
                   const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`
                   return (
@@ -412,6 +468,10 @@ const Themes: React.FC = () => {
                                   open={Boolean(anchorEl)}
                                   onClose={handleClose}
                                 >
+                                  <MenuItem onClick={() => {
+                                    handleClose();
+                                    toggleEditState(currentLinkCollectionId, true);
+                                  }}>編集</MenuItem>
                                   <MenuItem onClick={() => {
                                     handleClose();
                                     handleDeleteLinkCollection(currentLinkCollectionId);
@@ -434,16 +494,29 @@ const Themes: React.FC = () => {
                         <CardContent>
                           <Typography variant="body2" component="p">
                             {
-                              linkCollection.links.map((link: any) => {
-                                return (
-                                  <>
-                                    <OgpLinkCard
-                                      link={link}
-                                    />
-                                    <p>{link.description}</p>
-                                  </>
-                                );
-                              })
+                              editStates[linkCollection.linkCollectionId] ? (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    sx={{ mt: 2 }}
+                                    onClick={() => {toggleEditState(linkCollection.linkCollectionId, false)}}
+                                  >
+                                    編集をやめる
+                                  </Button>
+                                </>
+                              ) : (
+                                linkCollection.links.map((link: any) => {
+                                  return (
+                                    <>
+                                      <OgpLinkCard
+                                        link={link}
+                                      />
+                                      <p>LinkId: {link.linkId}</p>
+                                      <p>{link.description}</p>
+                                    </>
+                                  );
+                                })
+                              )
                             }
                           </Typography>
                         </CardContent>
