@@ -259,8 +259,8 @@ const Themes: React.FC = () => {
   // リンク集更新
   const handleUpdateLinkCollection = async (linkCollectionId: number) => {
     const data: PutLinkCollectionRequest = {
-      subtitle: subtitle,
-      links: links
+      subtitle: updateLinksDict[linkCollectionId].subtitle,
+      links: updateLinksDict[linkCollectionId].links
     }
 
     try {
@@ -270,6 +270,7 @@ const Themes: React.FC = () => {
       if (res?.status === 200) {
         console.log("OK")
         handleGetTheme()
+        toggleEditState(linkCollectionId, false)
       } else {
         console.log("Failed")
       }
@@ -360,7 +361,94 @@ const Themes: React.FC = () => {
       ...prevEditStates,
       [id]: flag
     }));
+    if (flag) {
+      var tmpSubtitle = ""
+      var tmpLinks: any[] = []
+      
+      theme.linkCollections?.forEach((linkCollection: any) => {
+        if (linkCollection.linkCollectionId == id) {
+          tmpSubtitle = linkCollection.subtitle
+          tmpLinks = linkCollection.links
+        }
+      });
+      
+      // updateLinksDictに追加
+      setUpdateLinksDict(prevUpdateLinksDict => ({
+        ...prevUpdateLinksDict,
+        [id]: {
+          subtitle: tmpSubtitle,
+          links: tmpLinks
+        }
+      }));
+    }else {
+      // updateLinksDictを削除
+      setUpdateLinksDict(prevUpdateLinksDict => {
+        const newUpdateLinksDict = { ...prevUpdateLinksDict };
+        delete newUpdateLinksDict[id];
+        return newUpdateLinksDict;
+      });
+    }
+    console.log(updateLinksDict);
   };
+
+  const handleLinksDictSubtitleChange = (e: any, id: number) => {
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [id]: {
+        subtitle: e.target.value,
+        links: updateLinksDict[id].links
+      }
+    }));
+  };
+
+  const handleLinksDictUrlChange = (e: any, id: number, index: number) => {
+    console.log(updateLinksDict)
+    const linksDictLinks = [...updateLinksDict[id].links]
+    linksDictLinks[index].url = e.target.value
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [id]: {
+        subtitle: updateLinksDict[id].subtitle,
+        links: linksDictLinks
+      }
+    }));
+  };
+
+  const handleLinksDictDescriptionChange = (e: any, id: number, index: number) => {
+    console.log(updateLinksDict)
+    const linksDictLinks = [...updateLinksDict[id].links]
+    linksDictLinks[index].description = e.target.value
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [id]: {
+        subtitle: updateLinksDict[id].subtitle,
+        links: linksDictLinks
+      }
+    }));
+  };
+
+  const handleCreateLinksDictLinkForm = (id: number) => {
+    const linksDictLinks = [...updateLinksDict[id].links, { url: "", description: "" }]
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [id]: {
+        subtitle: updateLinksDict[id].subtitle,
+        links: linksDictLinks
+      }
+    }));
+  }
+
+  const handleDeleteLinksDictLinkForm = (id: number, index: number) => {
+    const linksDictLinks = [...updateLinksDict[id].links]
+    linksDictLinks.splice(index, 1)
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [id]: {
+        subtitle: updateLinksDict[id].subtitle,
+        links: linksDictLinks
+      }
+    }));
+  }
 
   const updateEditStates = () => {
     const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
@@ -377,6 +465,18 @@ const Themes: React.FC = () => {
   
       return newEditStates;
     });
+  };
+
+  const [updateLinksDict, setUpdateLinksDict] = useState<{ [key: number]: PostLinkCollectionRequest }>({});
+
+  const initialLinksDict = () => {
+    setUpdateLinksDict(prevUpdateLinksDict => ({
+      ...prevUpdateLinksDict,
+      [-1]: {
+        subtitle: "",
+        links: []
+      }
+    }));
   };
 
   return (
@@ -496,6 +596,33 @@ const Themes: React.FC = () => {
                             {
                               editStates[linkCollection.linkCollectionId] ? (
                                 <>
+                                  <input
+                                    type="text"
+                                    placeholder="サブタイトル"
+                                    name="subtitle"
+                                    value={updateLinksDict[linkCollection.linkCollectionId].subtitle}
+                                    onChange={(e) => handleLinksDictSubtitleChange(e, linkCollection.linkCollectionId)}
+                                  />
+                                  {updateLinksDict[linkCollection.linkCollectionId].links.map((link: PostLinkCollectionRequestLink, index: number) => (
+                                    <Grid item xs={12} key={index}>
+                                      <input
+                                        type="text"
+                                        placeholder="リンク"
+                                        name="url"
+                                        value={link.url}
+                                        onChange={(e) => handleLinksDictUrlChange(e, linkCollection.linkCollectionId, index)}
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="コメント"
+                                        name="description"
+                                        value={link.description}
+                                        onChange={(e) => handleLinksDictDescriptionChange(e, linkCollection.linkCollectionId, index)}
+                                      />
+                                      <button onClick={() => handleDeleteLinksDictLinkForm(linkCollection.linkCollectionId, index)}>-</button>
+                                    </Grid>
+                                  ))}
+                                  <Button onClick={() => handleCreateLinksDictLinkForm(linkCollection.linkCollectionId)}>リンク集を追加</Button>
                                   <Button
                                     variant="contained"
                                     sx={{ mt: 2 }}
@@ -503,6 +630,7 @@ const Themes: React.FC = () => {
                                   >
                                     編集をやめる
                                   </Button>
+                                  <Button onClick={() => handleUpdateLinkCollection(linkCollection.linkCollectionId)}>保存</Button>
                                 </>
                               ) : (
                                 linkCollection.links.map((link: any) => {

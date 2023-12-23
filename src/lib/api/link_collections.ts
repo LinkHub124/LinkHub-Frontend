@@ -17,7 +17,7 @@ export const putLinkCollections = (id: number, linkCollectionId: number, data: P
     "client": Cookies.get("_client"),
     "uid": Cookies.get("_uid"),
   };
-  return client.put(`/themes/${id}/link_collections`, { link_collection: data }, { headers });
+  return client.put(`/themes/${id}/link_collections/${linkCollectionId}`, { link_collection: data }, { headers });
 };
 
 export const deleteLinkCollections = (id: number, linkCollectionId: number) => {
