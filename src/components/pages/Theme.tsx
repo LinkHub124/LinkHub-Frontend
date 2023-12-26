@@ -127,8 +127,10 @@ const Themes: React.FC = () => {
   const [subtitle, setSubtitle] = useState<string>("")
   const [links, setLinks] = useState<PostLinkCollectionRequestLink[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-
-  const initialThemeState: GetThemeResponse = {
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
+  const [title, setTitle] = useState<string>("")
+  const [postStatus, setPostStatus] = useState<string>("Private")
+  const [theme, setTheme] = useState<GetThemeResponse>({
     themeId: 0,
     title: "test_name",
     postStatus: 0,
@@ -139,29 +141,35 @@ const Themes: React.FC = () => {
     },
     createdAt: new Date("1990/01/01"),
     updatedAt: new Date("1990/01/01")
-  }
-
-  const [theme, setTheme] = useState<GetThemeResponse>(initialThemeState)
-
-  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
-  const [title, setTitle] = useState<string>("")
-  const [postStatus, setPostStatus] = useState<string>("Private")
+  })
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されている linkCollectionId を追跡
+  const initializeEditStateDict = () => {
+    const editStateDict: { [key: number]: boolean } = {};
+    theme.linkCollections?.map((linkCollection: any) => {
+      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
+    })
+    return editStateDict;
+  };
+  const [editStates, setEditStates] = useState(initializeEditStateDict());
+  const [updateLinkCollectionDict, setUpdateLinkCollectionDict] = useState<{ [key: number]: PostLinkCollectionRequest }>({});
 
   const postStatusOptions: string[] = ['Private', 'Limited', 'Public']
-
   const navigate = useNavigate()
-  
 
+  // タイトルをクリックした時に編集状態にする
   const handleTitleClick = () => {
     if(currentUser == undefined) return
     if(theme.user.userId != currentUser.id) return
     setIsEditingTitle(true)
   }
 
-  const handleTitleChange = (e: any) => {
+  // テーマのタイトルを入力に応じて更新する
+  const handleThemeTitleChange = (e: any) => {
     setTitle(e.target.value)
   }
 
+  // テーマの投稿状態を入力状態に応じて更新する
   const handlePostStatusChange = (e: any) => {
     setPostStatus(e.target.value)
   }
@@ -259,8 +267,8 @@ const Themes: React.FC = () => {
   // リンク集更新
   const handleUpdateLinkCollection = async (linkCollectionId: number) => {
     const data: PutLinkCollectionRequest = {
-      subtitle: updateLinksDict[linkCollectionId].subtitle,
-      links: updateLinksDict[linkCollectionId].links
+      subtitle: updateLinkCollectionDict[linkCollectionId].subtitle,
+      links: updateLinkCollectionDict[linkCollectionId].links
     }
 
     try {
@@ -333,27 +341,16 @@ const Themes: React.FC = () => {
     handleGetTheme()
   }, [])
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されている linkCollectionId を追跡
-
+  // ミートボールメニューをクリック
   const handleMeatBallMenuClick = (event: any, id: number) => {
     setAnchorEl(event.currentTarget);
     setCurrentLinkCollectionId(id); // クリックされた時点での linkCollectionId を保存
   };
 
+  // ミートボールメニューを非表示
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const initializeEditStateDict = () => {
-    const editStateDict: { [key: number]: boolean } = {};
-    theme.linkCollections?.map((linkCollection: any) => {
-      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
-    })
-    return editStateDict;
-  };
-  
-  const [editStates, setEditStates] = useState(initializeEditStateDict());
 
   // 編集状態の切り替え関数
   const toggleEditState = (id: number, flag: boolean) => {
@@ -372,80 +369,78 @@ const Themes: React.FC = () => {
         }
       });
       
-      // updateLinksDictに追加
-      setUpdateLinksDict(prevUpdateLinksDict => ({
-        ...prevUpdateLinksDict,
+      // updateLinkCollectionDictに追加
+      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+        ...prevUpdateLinkCollectionDict,
         [id]: {
           subtitle: tmpSubtitle,
           links: tmpLinks
         }
       }));
     }else {
-      // updateLinksDictを削除
-      setUpdateLinksDict(prevUpdateLinksDict => {
-        const newUpdateLinksDict = { ...prevUpdateLinksDict };
-        delete newUpdateLinksDict[id];
-        return newUpdateLinksDict;
+      // updateLinkCollectionDictを削除
+      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => {
+        const newUpdateLinkCollectionDict = { ...prevUpdateLinkCollectionDict };
+        delete newUpdateLinkCollectionDict[id];
+        return newUpdateLinkCollectionDict;
       });
     }
-    console.log(updateLinksDict);
   };
 
-  const handleLinksDictSubtitleChange = (e: any, id: number) => {
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
+  // 
+  const handleLinkCollectionDictSubtitleChange = (e: any, id: number) => {
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
       [id]: {
         subtitle: e.target.value,
-        links: updateLinksDict[id].links
+        links: updateLinkCollectionDict[id].links
       }
     }));
   };
 
-  const handleLinksDictUrlChange = (e: any, id: number, index: number) => {
-    console.log(updateLinksDict)
-    const linksDictLinks = [...updateLinksDict[id].links]
-    linksDictLinks[index].url = e.target.value
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
+  const handleLinkCollectionDictUrlChange = (e: any, id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks[index].url = e.target.value
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
       [id]: {
-        subtitle: updateLinksDict[id].subtitle,
-        links: linksDictLinks
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
       }
     }));
   };
 
-  const handleLinksDictDescriptionChange = (e: any, id: number, index: number) => {
-    console.log(updateLinksDict)
-    const linksDictLinks = [...updateLinksDict[id].links]
-    linksDictLinks[index].description = e.target.value
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
+  const handleLinkCollectionDictDescriptionChange = (e: any, id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks[index].description = e.target.value
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
       [id]: {
-        subtitle: updateLinksDict[id].subtitle,
-        links: linksDictLinks
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
       }
     }));
   };
 
-  const handleCreateLinksDictLinkForm = (id: number) => {
-    const linksDictLinks = [...updateLinksDict[id].links, { url: "", description: "" }]
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
+  const handleCreateLinkCollectionDictLinkForm = (id: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links, { url: "", description: "" }]
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
       [id]: {
-        subtitle: updateLinksDict[id].subtitle,
-        links: linksDictLinks
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
       }
     }));
   }
 
-  const handleDeleteLinksDictLinkForm = (id: number, index: number) => {
-    const linksDictLinks = [...updateLinksDict[id].links]
-    linksDictLinks.splice(index, 1)
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
+  const handleDeleteLinkCollectionDictLinkForm = (id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks.splice(index, 1)
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
       [id]: {
-        subtitle: updateLinksDict[id].subtitle,
-        links: linksDictLinks
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
       }
     }));
   }
@@ -467,18 +462,6 @@ const Themes: React.FC = () => {
     });
   };
 
-  const [updateLinksDict, setUpdateLinksDict] = useState<{ [key: number]: PostLinkCollectionRequest }>({});
-
-  const initialLinksDict = () => {
-    setUpdateLinksDict(prevUpdateLinksDict => ({
-      ...prevUpdateLinksDict,
-      [-1]: {
-        subtitle: "",
-        links: []
-      }
-    }));
-  };
-
   return (
     <>
       {
@@ -491,7 +474,7 @@ const Themes: React.FC = () => {
                     <input
                       type="text"
                       value={title}
-                      onChange={handleTitleChange}
+                      onChange={handleThemeTitleChange}
                     />
                     <Select
                       value={postStatus}
@@ -600,29 +583,29 @@ const Themes: React.FC = () => {
                                     type="text"
                                     placeholder="サブタイトル"
                                     name="subtitle"
-                                    value={updateLinksDict[linkCollection.linkCollectionId].subtitle}
-                                    onChange={(e) => handleLinksDictSubtitleChange(e, linkCollection.linkCollectionId)}
+                                    value={updateLinkCollectionDict[linkCollection.linkCollectionId].subtitle}
+                                    onChange={(e) => handleLinkCollectionDictSubtitleChange(e, linkCollection.linkCollectionId)}
                                   />
-                                  {updateLinksDict[linkCollection.linkCollectionId].links.map((link: PostLinkCollectionRequestLink, index: number) => (
+                                  {updateLinkCollectionDict[linkCollection.linkCollectionId].links.map((link: PostLinkCollectionRequestLink, index: number) => (
                                     <Grid item xs={12} key={index}>
                                       <input
                                         type="text"
                                         placeholder="リンク"
                                         name="url"
                                         value={link.url}
-                                        onChange={(e) => handleLinksDictUrlChange(e, linkCollection.linkCollectionId, index)}
+                                        onChange={(e) => handleLinkCollectionDictUrlChange(e, linkCollection.linkCollectionId, index)}
                                       />
                                       <input
                                         type="text"
                                         placeholder="コメント"
                                         name="description"
                                         value={link.description}
-                                        onChange={(e) => handleLinksDictDescriptionChange(e, linkCollection.linkCollectionId, index)}
+                                        onChange={(e) => handleLinkCollectionDictDescriptionChange(e, linkCollection.linkCollectionId, index)}
                                       />
-                                      <button onClick={() => handleDeleteLinksDictLinkForm(linkCollection.linkCollectionId, index)}>-</button>
+                                      <button onClick={() => handleDeleteLinkCollectionDictLinkForm(linkCollection.linkCollectionId, index)}>-</button>
                                     </Grid>
                                   ))}
-                                  <Button onClick={() => handleCreateLinksDictLinkForm(linkCollection.linkCollectionId)}>リンク集を追加</Button>
+                                  <Button onClick={() => handleCreateLinkCollectionDictLinkForm(linkCollection.linkCollectionId)}>リンク集を追加</Button>
                                   <Button
                                     variant="contained"
                                     sx={{ mt: 2 }}
