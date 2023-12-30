@@ -3,6 +3,7 @@ export interface User {
   email: string
   name: string
   introduction: string
+  image?: string
 }
 
 export interface GetUserResponse {
@@ -20,4 +21,8 @@ export interface GetUserResponse {
 
 export interface PutUserRequest {
   name: string
+  image?: {
+    data: string
+    name: string
+  }
 }

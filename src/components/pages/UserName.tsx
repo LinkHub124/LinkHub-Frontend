@@ -22,8 +22,7 @@ import { AuthContext } from "App"
 const Themes: React.FC = () => {
   const initialUserState: GetUserResponse = {
     userId: 0,
-    name: "test_name",
-    image: "test_image"
+    name: "test_name"
   }
 
   const [loading, setLoading] = useState<boolean>(true)
@@ -31,7 +30,7 @@ const Themes: React.FC = () => {
 
   const { user_name } = useParams<{ user_name: string }>()
 
-  // ユーザー一覧を取得
+  // ユーザーを取得
   const handleGetUser = async () => {
     try {
       const res = await getUser(user_name as string)
@@ -67,8 +66,8 @@ const Themes: React.FC = () => {
                       justifyContent="center"
                       alignItems="center"
                     >
-                      <Avatar variant="rounded" sx={{ m: 3, width: 100, height: 100 }} />
-                      <Typography>{user.name}</Typography>
+                      <Avatar variant="rounded" src={user.image} sx={{ m: 3, width: 100, height: 100 }} />
+                      <Typography>{user?.name}</Typography>
                     </Box>
                   </CardContent>
                 </Card>

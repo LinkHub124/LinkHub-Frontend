@@ -28,6 +28,27 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [name, setName] = useState<string>("")
   const [currentUserName, setCurrentUserName] = useState<string>("")
+  const [image, setImage] = useState<string | undefined>();
+  const [img, setImg] = useState({data: "", name: ""})
+
+  const handleUserImageChange = (e: any) => {
+    console.log(e.target.files[0])
+    setImage(e.target.files[0]);
+  };
+
+  const handleImageSelect = (e: any) => {
+    const reader = new FileReader()
+    const files = (e.target as HTMLInputElement).files
+    if (files) {
+      reader.onload = () => {
+        setImg({
+          data: reader.result as string,
+          name: files[0] ? files[0].name : "unknownfile"
+        })
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
 
   const handleUserNameChange = (e: any) => {
     setName(e.target.value);
@@ -35,14 +56,17 @@ const Settings: React.FC = () => {
 
   const handleUpdateUser = async () => {
     const data: PutUserRequest = {
-      name: name
+      name: name,
+      image: img
     }
+    console.log(data)
 
     try {
       const res = await putUser(currentUserName, data)
       console.log(res)
 
       if (res?.status === 200) {
+        console.log(res?.data)
         console.log("Updated")
       } else {
         console.log("No themes")
@@ -75,6 +99,10 @@ const Settings: React.FC = () => {
                     type="text"
                     value={name}
                     onChange={handleUserNameChange}
+                  />
+                  <input
+                    type="file"
+                    onChange={handleImageSelect} 
                   />
                   <Button onClick={handleUpdateUser}>更新</Button>
                 </>
