@@ -9,6 +9,7 @@ import Themes from "components/pages/Themes"
 import NewTheme from "components/pages/NewTheme"
 import Theme from "components/pages/Theme"
 import UserName from "components/pages/UserName"
+import Settings from "components/pages/Settings"
 import Test from "components/pages/Test"
 
 import { getCurrentUser } from "lib/api/auth"
@@ -85,6 +86,7 @@ const App: React.FC = () => {
             <Route path="/:user_name" element={<UserName />} />
             <Route path="/themes/new" element={<NewTheme />} />
             <Route path="/themes/:theme_id" element={<Theme />} />
+            <Route path="/settings" element={<Settings />} />
             {/* <Route
               path="*"
               element={

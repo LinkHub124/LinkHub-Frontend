@@ -88,6 +88,7 @@ const OgpLinkCard: React.FC<OgpLinkCardType> = ({ link }) => {
             }}>
               {link.urlDescription}
             </Box>
+
             <Box component="span" className="one-link-url" sx={{
               display: '-webkit-box',
               maxheight: '3em',

@@ -17,3 +17,7 @@ export interface GetUserResponse {
     updatedAt: Date
   }[]
 }
+
+export interface PutUserRequest {
+  name: string
+}

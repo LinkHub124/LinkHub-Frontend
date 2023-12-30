@@ -1,5 +1,5 @@
 import client from "lib/api/client"
-// import { UpdateUserFormData } from "interfaces/index"
+import { PutUserRequest } from "interfaces/user"
 
 import Cookies from "js-cookie"
 
@@ -30,5 +30,14 @@ export const getUser = (user_name: string) => {
     "uid": Cookies.get("_uid"),
   };
 
-  return client.get(`users/${user_name}`, { headers })
+  return client.get(`/users/${user_name}`, { headers })
 }
+
+export const putUser = (user_name: string, data: PutUserRequest) => {
+  const headers = {
+    "access-token": Cookies.get("_access_token"),
+    "client": Cookies.get("_client"),
+    "uid": Cookies.get("_uid"),
+  };
+  return client.put(`/users/${user_name}`, { user: data }, { headers });
+};
