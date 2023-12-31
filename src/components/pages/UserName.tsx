@@ -25,6 +25,8 @@ const Themes: React.FC = () => {
     name: "test_name"
   }
 
+  const { currentUser } = useContext(AuthContext)
+
   const [loading, setLoading] = useState<boolean>(true)
   const [user, setUser] = useState<GetUserResponse>(initialUserState)
 
@@ -68,6 +70,13 @@ const Themes: React.FC = () => {
                     >
                       <Avatar variant="rounded" src={user.image} sx={{ m: 3, width: 100, height: 100 }} />
                       <Typography>{user?.name}</Typography>
+                      {
+                        currentUser?.name === user_name && (
+                          <Link to="/settings">
+                            ユーザー設定
+                          </Link>
+                        )
+                      }
                     </Box>
                   </CardContent>
                 </Card>

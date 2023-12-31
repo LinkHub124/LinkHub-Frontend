@@ -17,6 +17,7 @@ import { putUser } from "lib/api/user_name"
 import { GetUserResponse } from "interfaces/user"
 
 import { PutUserRequest } from "interfaces/user"
+import { useNavigate } from 'react-router-dom'
 
 import { AuthContext } from "App"
 
@@ -28,25 +29,24 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [name, setName] = useState<string>("")
   const [currentUserName, setCurrentUserName] = useState<string>("")
-  const [image, setImage] = useState<string | undefined>();
-  const [img, setImg] = useState({data: "", name: ""})
+  const [image, setImage] = useState({data: "", name: ""})
+  const [preview, setPreview] = useState<string>("")
 
-  const handleUserImageChange = (e: any) => {
-    console.log(e.target.files[0])
-    setImage(e.target.files[0]);
-  };
+  const navigate = useNavigate()
 
   const handleImageSelect = (e: any) => {
     const reader = new FileReader()
     const files = (e.target as HTMLInputElement).files
     if (files) {
+      if(!files[0]) return;
       reader.onload = () => {
-        setImg({
+        setImage({
           data: reader.result as string,
           name: files[0] ? files[0].name : "unknownfile"
         })
       }
       reader.readAsDataURL(files[0])
+      setPreview(window.URL.createObjectURL(files[0]))
     }
   }
 
@@ -57,9 +57,8 @@ const Settings: React.FC = () => {
   const handleUpdateUser = async () => {
     const data: PutUserRequest = {
       name: name,
-      image: img
+      image: image
     }
-    console.log(data)
 
     try {
       const res = await putUser(currentUserName, data)
@@ -68,6 +67,7 @@ const Settings: React.FC = () => {
       if (res?.status === 200) {
         console.log(res?.data)
         console.log("Updated")
+        navigate(`/${name}`)
       } else {
         console.log("No themes")
       }
@@ -107,6 +107,16 @@ const Settings: React.FC = () => {
                   <Button onClick={handleUpdateUser}>更新</Button>
                 </>
               </Grid>
+              {
+              preview ? (
+                <Box>
+                  <img
+                    src={preview}
+                    alt="preview img"
+                  />
+                </Box>
+              ) : null
+            }
             </Grid>
           </>
         ) : (
