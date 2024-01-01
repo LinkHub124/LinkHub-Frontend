@@ -47,3 +47,7 @@ export interface PutThemeRequest {
   title: string
   postStatus: number
 }
+
+export interface PutThemeRequestTags {
+  tag_list?: string[]
+}

@@ -19,9 +19,9 @@ import Divider from "@mui/material/Divider"
 
 import AlertMessage from "components/utils/AlertMessage"
 
-import { getTheme, putTheme, deleteTheme } from "lib/api/themes"
+import { getTheme, putTheme, putThemeTags, deleteTheme } from "lib/api/themes"
 import { postLinkCollections, putLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
-import { GetThemeResponse, PutThemeRequest } from "interfaces/theme"
+import { GetThemeResponse, PutThemeRequest, PutThemeRequestTags } from "interfaces/theme"
 import { PostLinkCollectionRequest, PostLinkCollectionRequestLink, PutLinkCollectionRequest } from "interfaces/link_collection"
 
 import { AuthContext } from "App"
@@ -119,8 +119,8 @@ const OgpLinkCard: React.FC<OgpLinkCardType> = ({ link }) => {
   );
 };
 
-// ユーザー一覧ページ
-const Themes: React.FC = () => {
+// テーマ詳細ページ
+const Theme: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
   const { theme_id } = useParams<{ theme_id: string }>()
   const parsedId = parseInt(theme_id as string, 10)
@@ -184,6 +184,7 @@ const Themes: React.FC = () => {
       if (res?.status === 200) {
         setTheme(res?.data.theme)
         setTitle(res?.data.theme.title)
+        setTags(res?.data.theme.tags)
         setPostStatus(postStatusOptions[res?.data.theme.postStatus])
         updateEditStates()
       } else {
@@ -192,7 +193,6 @@ const Themes: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
-
     setLoading(false)
   }
 
@@ -446,6 +446,69 @@ const Themes: React.FC = () => {
     }));
   }
 
+  // タグ機能
+
+  const [updateTags, setUpdateTags] = useState<string[]>([]);
+  const [isEditingTags, setIsEditingTags] = useState<boolean>(false)
+
+  // タグをクリックした時に編集状態にする
+  const handleEditTags = () => {
+    if(currentUser == undefined) return
+    if(theme.user.userId != currentUser.id) return
+    setIsEditingTags(true)
+    setUpdateTags([...tags])
+  }
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+
+  const handleNewTagChange = (e: any) => {
+    setNewTag(e.target.value);
+  }
+
+  const handleAddNewTag = () => {
+    if(newTag == "") return;
+    if (updateTags.includes(newTag)) {
+      setNewTag("");
+      return;
+    }
+    setUpdateTags([...updateTags, newTag]);
+    setNewTag("");
+  };
+
+  const handleDeleteTag = (tag: string) => {
+    const filteredUpdateTags = updateTags.filter(word => word !== tag);
+    setUpdateTags(filteredUpdateTags)
+  };
+
+  const handleEditTagsCancel = () => {
+    setIsEditingTags(false);
+  }
+
+  // テーマの詳細情報を更新
+  const handleUpdateThemeTags = async () => {
+    const data: PutThemeRequestTags = {
+      tag_list: updateTags
+    }
+
+    try {
+      const res = await putThemeTags(parsedId, data)
+      console.log(res)
+
+      if (res?.status === 200) {
+        console.log("Updated")
+        setTags([...updateTags])
+      } else {
+        console.log("No themes")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+
+    setLoading(false)
+    setIsEditingTags(false);
+  }
+
   const updateEditStates = () => {
     const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
   
@@ -468,7 +531,7 @@ const Themes: React.FC = () => {
       {
         !loading ? (
           <>
-            <Grid container spacing={2} sx={{ width: 960 }}>
+            <Grid container sx={{ width: 960 }}>
               <Grid item xs={12}>
                 {isEditingTitle ? (
                   <>
@@ -492,10 +555,42 @@ const Themes: React.FC = () => {
                     <h1 onClick={handleTitleClick}>{title}</h1>
                   </>
                 )}
-                <br/>
               </Grid>
             </Grid>
-            <Grid container spacing={2}>
+            <Grid container sx={{ width: 960 }}>
+              {isEditingTags ? (
+                <>
+                  {updateTags.map((tag: string) => (
+                    <>
+                      <h3>{tag}</h3>
+                      <Button onClick={() => handleDeleteTag(tag)}>x</Button>
+                    </>
+                  ))}
+                  <input
+                    type="text"
+                    placeholder="新規タグ"
+                    name="url"
+                    value={newTag}
+                    onChange={handleNewTagChange}
+                  />
+                  <Button onClick={handleAddNewTag}>タグ保存</Button>
+                  <Button onClick={handleEditTagsCancel}>キャンセル</Button>
+                  <Button onClick={handleUpdateThemeTags}>保存</Button>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={12}>
+                    {tags.map((tag: string) => (
+                      <>
+                        <h3>{tag}</h3>
+                      </>
+                    ))}
+                  </Grid>
+                  <Button onClick={handleEditTags}>タグを編集</Button>
+                </>
+              )}
+            </Grid>
+            <Grid container>
               {
                 currentUser && currentUser.id == theme.user.userId ? (
                   <>
@@ -647,4 +742,4 @@ const Themes: React.FC = () => {
   )
 }
 
-export default Themes
+export default Theme
