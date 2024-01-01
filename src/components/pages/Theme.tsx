@@ -19,9 +19,9 @@ import Divider from "@mui/material/Divider"
 
 import AlertMessage from "components/utils/AlertMessage"
 
-import { getTheme, putTheme, putThemeTags, deleteTheme } from "lib/api/themes"
+import { getTheme, putTheme, deleteTheme } from "lib/api/themes"
 import { postLinkCollections, putLinkCollections, deleteLinkCollections } from "lib/api/link_collections"
-import { GetThemeResponse, PutThemeRequest, PutThemeRequestTags } from "interfaces/theme"
+import { GetThemeResponse, PutThemeRequest } from "interfaces/theme"
 import { PostLinkCollectionRequest, PostLinkCollectionRequestLink, PutLinkCollectionRequest } from "interfaces/link_collection"
 
 import { AuthContext } from "App"
@@ -130,7 +130,9 @@ const Theme: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
   const [title, setTitle] = useState<string>("")
+  const [updateTitle, setUpdateTitle] = useState<string>("")
   const [postStatus, setPostStatus] = useState<string>("Private")
+  const [updatePostStatus, setUpdatePostStatus] = useState<string>("Private")
   const [theme, setTheme] = useState<GetThemeResponse>({
     themeId: 0,
     title: "test_name",
@@ -163,16 +165,22 @@ const Theme: React.FC = () => {
     if(currentUser == undefined) return
     if(theme.user.userId != currentUser.id) return
     setIsEditingTitle(true)
+    setUpdateTitle(title);
+    setUpdatePostStatus(postStatus);
   }
 
   // テーマのタイトルを入力に応じて更新する
   const handleThemeTitleChange = (e: any) => {
-    setTitle(e.target.value)
+    setUpdateTitle(e.target.value)
+  }
+
+  const handleThemeTitleChangeCancel = (e: any) => {
+    setIsEditingTitle(false)
   }
 
   // テーマの投稿状態を入力状態に応じて更新する
   const handlePostStatusChange = (e: any) => {
-    setPostStatus(e.target.value)
+    setUpdatePostStatus(e.target.value)
   }
 
   // テーマの詳細情報を取得
@@ -184,8 +192,8 @@ const Theme: React.FC = () => {
       if (res?.status === 200) {
         setTheme(res?.data.theme)
         setTitle(res?.data.theme.title)
-        setTags(res?.data.theme.tags)
         setPostStatus(postStatusOptions[res?.data.theme.postStatus])
+        setTags(res?.data.theme.tags)
         updateEditStates()
       } else {
         console.log("No themes")
@@ -199,8 +207,9 @@ const Theme: React.FC = () => {
   // テーマの詳細情報を更新
   const handleUpdateTheme = async () => {
     const data: PutThemeRequest = {
-      title: title,
-      postStatus: postStatusOptions.indexOf(postStatus)
+      title: updateTitle,
+      postStatus: postStatusOptions.indexOf(updatePostStatus),
+      tagList: tags
     }
 
     try {
@@ -209,6 +218,8 @@ const Theme: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("Updated")
+        setTitle(updateTitle)
+        setPostStatus(updatePostStatus)
       } else {
         console.log("No themes")
       }
@@ -482,21 +493,25 @@ const Theme: React.FC = () => {
   };
 
   const handleEditTagsCancel = () => {
+    setNewTag("");
     setIsEditingTags(false);
   }
 
   // テーマの詳細情報を更新
   const handleUpdateThemeTags = async () => {
-    const data: PutThemeRequestTags = {
-      tag_list: updateTags
+    const data: PutThemeRequest = {
+      title: title,
+      postStatus: postStatusOptions.indexOf(postStatus),
+      tagList: updateTags
     }
 
     try {
-      const res = await putThemeTags(parsedId, data)
+      const res = await putTheme(parsedId, data)
       console.log(res)
 
       if (res?.status === 200) {
         console.log("Updated")
+        setNewTag("")
         setTags([...updateTags])
       } else {
         console.log("No themes")
@@ -537,17 +552,18 @@ const Theme: React.FC = () => {
                   <>
                     <input
                       type="text"
-                      value={title}
+                      value={updateTitle}
                       onChange={handleThemeTitleChange}
                     />
                     <Select
-                      value={postStatus}
+                      value={updatePostStatus}
                       onChange={handlePostStatusChange}
                     >
                       <MenuItem value="Private">Private</MenuItem>
                       <MenuItem value="Limited">Limited</MenuItem>
                       <MenuItem value="Public">Public</MenuItem>
                     </Select>
+                    <Button onClick={handleThemeTitleChangeCancel}>キャンセル</Button>
                     <Button onClick={handleUpdateTheme}>保存</Button>
                   </>
                 ) : (
