@@ -124,13 +124,6 @@ const Theme: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
   const { theme_id } = useParams<{ theme_id: string }>()
   const parsedId = parseInt(theme_id as string, 10)
-  const initializeEditStateDict = () => {
-    const editStateDict: { [key: number]: boolean } = {};
-    theme.linkCollections?.map((linkCollection: any) => {
-      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
-    })
-    return editStateDict;
-  };
 
   const [theme, setTheme] = useState<GetThemeResponse>({
     themeId: 0,
@@ -166,7 +159,13 @@ const Theme: React.FC = () => {
   // リンク集編集
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されているlinkCollectionIdを追跡
-  const [editStates, setEditStates] = useState(initializeEditStateDict());
+  const [linkCollectionEditStates, setLinkCollectionEditStates] = useState(() => {
+    const editStateDict: { [key: number]: boolean } = {};
+    theme.linkCollections?.forEach((linkCollection: any) => {
+      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
+    });
+    return editStateDict;
+  });
   const [updateLinkCollectionDict, setUpdateLinkCollectionDict] = useState<{ [key: number]: PostLinkCollectionRequest }>({});
 
   // その他変数
@@ -175,6 +174,12 @@ const Theme: React.FC = () => {
   const postStatusOptions: string[] = ['Private', 'Limited', 'Public']
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    handleGetTheme()
+  }, [])
+
+
 
   // テーマ編集
 
@@ -197,6 +202,8 @@ const Theme: React.FC = () => {
   const handlePostStatusChange = (e: any) => {
     setUpdatePostStatus(e.target.value)
   }
+
+
 
   // タグ機能
 
@@ -226,12 +233,179 @@ const Theme: React.FC = () => {
     setNewTag("");
   };
 
+  // タグを削除する
   const handleDeleteTag = (tag: string) => {
     const filteredUpdateTags = updateTags.filter(word => word !== tag);
     setUpdateTags(filteredUpdateTags)
   };
 
+
+
+  // リンク集追加
+
+  // リンク集のサブタイトル追加
+  const handleLinkCollectionSubtitleChange = (e: any) => {
+    setNewSubtitle(e.target.value)
+  }
+
+  // リンクフォームのURL追加
+  const handleLinkUrlChange = (e: any, index: number) => {
+    const updateLinks = [...newLinks]
+    updateLinks[index].url = e.target.value
+    setNewLinks(updateLinks)
+  }
+
+  // リンクフォームのdescription修正
+  const handleLinkDescriptionChange = (e: any, index: number) => {
+    const updateLinks = [...newLinks]
+    updateLinks[index].description = e.target.value
+    setNewLinks(updateLinks)
+  }
+
+  // リンクフォーム追加
+  const handleCreateLinkForm = () => {
+    setNewLinks([...newLinks, { url: "", description: "" }])
+  }
+
+  // リンクフォーム削除
+  const handleDeleteLinkForm = (index: number) => {
+    const updateLinks = [...newLinks]
+    updateLinks.splice(index, 1)
+    setNewLinks(updateLinks)
+  }
+
+
+
+  // リンク集修正
+
+  // ミートボールメニューをクリック
+  const handleMeatBallMenuClick = (event: any, id: number) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentLinkCollectionId(id); // クリックされた時点での linkCollectionId を保存
+  };
+
+  // ミートボールメニューを非表示
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  // 編集状態の切り替え関数
+  // linkCollectionIdに該当するリンク集を編集するか決める
+  const toggleEditState = (linkCollectionId: number, flag: boolean) => {
+    setLinkCollectionEditStates(prevEditStates => ({
+      ...prevEditStates,
+      [linkCollectionId]: flag
+    }));
+    if (flag) {
+      var tmpSubtitle = ""
+      var tmpLinks: any[] = []
+      
+      theme.linkCollections?.forEach((linkCollection: any) => {
+        if (linkCollection.linkCollectionId == linkCollectionId) {
+          tmpSubtitle = linkCollection.subtitle
+          tmpLinks = linkCollection.links
+        }
+      });
+      
+      // updateLinkCollectionDictに追加
+      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+        ...prevUpdateLinkCollectionDict,
+        [linkCollectionId]: {
+          subtitle: tmpSubtitle,
+          links: tmpLinks
+        }
+      }));
+    }else {
+      // updateLinkCollectionDictを削除
+      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => {
+        const newUpdateLinkCollectionDict = { ...prevUpdateLinkCollectionDict };
+        delete newUpdateLinkCollectionDict[linkCollectionId];
+        return newUpdateLinkCollectionDict;
+      });
+    }
+  };
+
+  // 既にあるリンク集のサブタイトル編集
+  const handleLinkCollectionDictSubtitleChange = (e: any, id: number) => {
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
+      [id]: {
+        subtitle: e.target.value,
+        links: updateLinkCollectionDict[id].links
+      }
+    }));
+  };
+
+  // 既にあるリンク集のURL編集
+  const handleLinkCollectionDictUrlChange = (e: any, id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks[index].url = e.target.value
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
+      [id]: {
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
+      }
+    }));
+  };
+
+  // 既にあるリンク集のdescription編集
+  const handleLinkCollectionDictDescriptionChange = (e: any, id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks[index].description = e.target.value
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
+      [id]: {
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
+      }
+    }));
+  };
+
+  // 既にあるリンク集にリンクフォームを追加
+  const handleCreateLinkCollectionDictLinkForm = (id: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links, { url: "", description: "" }]
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
+      [id]: {
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
+      }
+    }));
+  }
+
+  // 既にあるリンク集のリンクフォームを削除
+  const handleDeleteLinkCollectionDictLinkForm = (id: number, index: number) => {
+    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
+    LinkCollectionDictLinks.splice(index, 1)
+    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
+      ...prevUpdateLinkCollectionDict,
+      [id]: {
+        subtitle: updateLinkCollectionDict[id].subtitle,
+        links: LinkCollectionDictLinks
+      }
+    }));
+  }
+
+  // サーバーからのデータに特定のリンク集がなければ、それを辞書から削除
+  const updateEditStates = () => {
+    const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
   
+    setLinkCollectionEditStates((prevEditStates) => {
+      const newEditStates = { ...prevEditStates };
+  
+      // 不要なキーを削除
+      Object.keys(newEditStates).forEach(key => {
+        if (!linkCollectionIds.includes(key)) {
+          delete newEditStates[parseInt(key, 10)];
+        }
+      });
+  
+      return newEditStates;
+    });
+  };
+
+
 
   // テーマの詳細情報を取得
   const handleGetTheme = async () => {
@@ -379,162 +553,6 @@ const Theme: React.FC = () => {
       console.log(err)
     }
   }
-
-  // リンク集のsubtitle修正
-  const handleLinkCollectionSubtitleChange = (e: any) => {
-    setNewSubtitle(e.target.value)
-  }
-
-  // リンクフォーム追加
-  const handleCreateLinkForm = () => {
-    setNewLinks([...newLinks, { url: "", description: "" }])
-  }
-
-  // リンクフォーム削除
-  const handleDeleteLinkForm = (index: number) => {
-    const updatedLinks = [...newLinks]
-    updatedLinks.splice(index, 1)
-    setNewLinks(updatedLinks)
-  }
-
-  // リンクフォームのurl修正
-  const handleLinkUrlChange = (e: any, index: number) => {
-    const updatedLinks = [...newLinks]
-    updatedLinks[index].url = e.target.value
-    setNewLinks(updatedLinks)
-  }
-
-  // リンクフォームのdescription修正
-  const handleLinkDescriptionChange = (e: any, index: number) => {
-    const updatedLinks = [...newLinks]
-    updatedLinks[index].description = e.target.value
-    setNewLinks(updatedLinks)
-  }
-
-  useEffect(() => {
-    handleGetTheme()
-  }, [])
-
-  // ミートボールメニューをクリック
-  const handleMeatBallMenuClick = (event: any, id: number) => {
-    setAnchorEl(event.currentTarget);
-    setCurrentLinkCollectionId(id); // クリックされた時点での linkCollectionId を保存
-  };
-
-  // ミートボールメニューを非表示
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  // 編集状態の切り替え関数
-  const toggleEditState = (id: number, flag: boolean) => {
-    setEditStates(prevEditStates => ({
-      ...prevEditStates,
-      [id]: flag
-    }));
-    if (flag) {
-      var tmpSubtitle = ""
-      var tmpLinks: any[] = []
-      
-      theme.linkCollections?.forEach((linkCollection: any) => {
-        if (linkCollection.linkCollectionId == id) {
-          tmpSubtitle = linkCollection.subtitle
-          tmpLinks = linkCollection.links
-        }
-      });
-      
-      // updateLinkCollectionDictに追加
-      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-        ...prevUpdateLinkCollectionDict,
-        [id]: {
-          subtitle: tmpSubtitle,
-          links: tmpLinks
-        }
-      }));
-    }else {
-      // updateLinkCollectionDictを削除
-      setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => {
-        const newUpdateLinkCollectionDict = { ...prevUpdateLinkCollectionDict };
-        delete newUpdateLinkCollectionDict[id];
-        return newUpdateLinkCollectionDict;
-      });
-    }
-  };
-
-  // 
-  const handleLinkCollectionDictSubtitleChange = (e: any, id: number) => {
-    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-      ...prevUpdateLinkCollectionDict,
-      [id]: {
-        subtitle: e.target.value,
-        links: updateLinkCollectionDict[id].links
-      }
-    }));
-  };
-
-  const handleLinkCollectionDictUrlChange = (e: any, id: number, index: number) => {
-    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
-    LinkCollectionDictLinks[index].url = e.target.value
-    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-      ...prevUpdateLinkCollectionDict,
-      [id]: {
-        subtitle: updateLinkCollectionDict[id].subtitle,
-        links: LinkCollectionDictLinks
-      }
-    }));
-  };
-
-  const handleLinkCollectionDictDescriptionChange = (e: any, id: number, index: number) => {
-    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
-    LinkCollectionDictLinks[index].description = e.target.value
-    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-      ...prevUpdateLinkCollectionDict,
-      [id]: {
-        subtitle: updateLinkCollectionDict[id].subtitle,
-        links: LinkCollectionDictLinks
-      }
-    }));
-  };
-
-  const handleCreateLinkCollectionDictLinkForm = (id: number) => {
-    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links, { url: "", description: "" }]
-    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-      ...prevUpdateLinkCollectionDict,
-      [id]: {
-        subtitle: updateLinkCollectionDict[id].subtitle,
-        links: LinkCollectionDictLinks
-      }
-    }));
-  }
-
-  const handleDeleteLinkCollectionDictLinkForm = (id: number, index: number) => {
-    const LinkCollectionDictLinks = [...updateLinkCollectionDict[id].links]
-    LinkCollectionDictLinks.splice(index, 1)
-    setUpdateLinkCollectionDict(prevUpdateLinkCollectionDict => ({
-      ...prevUpdateLinkCollectionDict,
-      [id]: {
-        subtitle: updateLinkCollectionDict[id].subtitle,
-        links: LinkCollectionDictLinks
-      }
-    }));
-  }
-
-  const updateEditStates = () => {
-    const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
-  
-    setEditStates((prevEditStates) => {
-      const newEditStates = { ...prevEditStates };
-  
-      // 不要なキーを削除
-      Object.keys(newEditStates).forEach(key => {
-        if (!linkCollectionIds.includes(key)) {
-          delete newEditStates[parseInt(key, 10)];
-        }
-      });
-  
-      return newEditStates;
-    });
-  };
 
   return (
     <>
@@ -684,7 +702,7 @@ const Theme: React.FC = () => {
                         <CardContent>
                           <Typography variant="body2" component="p">
                             {
-                              editStates[linkCollection.linkCollectionId] ? (
+                              linkCollectionEditStates[linkCollection.linkCollectionId] ? (
                                 <>
                                   <input
                                     type="text"
