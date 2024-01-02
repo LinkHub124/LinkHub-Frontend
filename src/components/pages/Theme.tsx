@@ -124,15 +124,14 @@ const Theme: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
   const { theme_id } = useParams<{ theme_id: string }>()
   const parsedId = parseInt(theme_id as string, 10)
+  const initializeEditStateDict = () => {
+    const editStateDict: { [key: number]: boolean } = {};
+    theme.linkCollections?.map((linkCollection: any) => {
+      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
+    })
+    return editStateDict;
+  };
 
-  const [subtitle, setSubtitle] = useState<string>("")
-  const [links, setLinks] = useState<PostLinkCollectionRequestLink[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
-  const [title, setTitle] = useState<string>("")
-  const [updateTitle, setUpdateTitle] = useState<string>("")
-  const [postStatus, setPostStatus] = useState<string>("Private")
-  const [updatePostStatus, setUpdatePostStatus] = useState<string>("Private")
   const [theme, setTheme] = useState<GetThemeResponse>({
     themeId: 0,
     title: "test_name",
@@ -145,26 +144,46 @@ const Theme: React.FC = () => {
     createdAt: new Date("1990/01/01"),
     updatedAt: new Date("1990/01/01")
   })
+  const [loading, setLoading] = useState<boolean>(true)
+
+  // テーマ編集
+  const [title, setTitle] = useState<string>("")
+  const [updateTitle, setUpdateTitle] = useState<string>("")
+  const [postStatus, setPostStatus] = useState<string>("Private")
+  const [updatePostStatus, setUpdatePostStatus] = useState<string>("Private")
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
+
+  // タグ編集
+  const [tags, setTags] = useState<string[]>([]);
+  const [updateTags, setUpdateTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+  const [isEditingTags, setIsEditingTags] = useState<boolean>(false)
+
+  // 新規リンク集追加
+  const [newSubtitle, setNewSubtitle] = useState<string>("")
+  const [newLinks, setNewLinks] = useState<PostLinkCollectionRequestLink[]>([])
+  
+  // リンク集編集
   const [anchorEl, setAnchorEl] = useState(null);
-  const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されている linkCollectionId を追跡
-  const initializeEditStateDict = () => {
-    const editStateDict: { [key: number]: boolean } = {};
-    theme.linkCollections?.map((linkCollection: any) => {
-      editStateDict[linkCollection.linkCollectionId] = false; // 初期値として false（非編集状態）を設定
-    })
-    return editStateDict;
-  };
+  const [currentLinkCollectionId, setCurrentLinkCollectionId] = useState(-1); // 現在選択されているlinkCollectionIdを追跡
   const [editStates, setEditStates] = useState(initializeEditStateDict());
   const [updateLinkCollectionDict, setUpdateLinkCollectionDict] = useState<{ [key: number]: PostLinkCollectionRequest }>({});
 
+  // その他変数
+  const updateThemeTitle = 1
+  const updateThemeTags = 2
   const postStatusOptions: string[] = ['Private', 'Limited', 'Public']
+
   const navigate = useNavigate()
 
-  // タイトルをクリックした時に編集状態にする
-  const handleTitleClick = () => {
+  // テーマ編集
+
+  // タイトルをクリックした時にタイトル・公開範囲を編集状態にする
+  // isEditingの値によって編集するか編集解除するかを決める
+  const handleEditTitle = (isEditing: boolean) => {
     if(currentUser == undefined) return
     if(theme.user.userId != currentUser.id) return
-    setIsEditingTitle(true)
+    setIsEditingTitle(isEditing)
     setUpdateTitle(title);
     setUpdatePostStatus(postStatus);
   }
@@ -174,14 +193,45 @@ const Theme: React.FC = () => {
     setUpdateTitle(e.target.value)
   }
 
-  const handleThemeTitleChangeCancel = (e: any) => {
-    setIsEditingTitle(false)
-  }
-
   // テーマの投稿状態を入力状態に応じて更新する
   const handlePostStatusChange = (e: any) => {
     setUpdatePostStatus(e.target.value)
   }
+
+  // タグ機能
+
+  // クリックした時にタグを編集状態にする
+  // isEditingの値によって編集するか編集解除するかを決める
+  const handleEditTags = (isEditing: boolean) => {
+    if(currentUser == undefined) return
+    if(theme.user.userId != currentUser.id) return
+    setIsEditingTags(isEditing)
+    setNewTag("");
+    setUpdateTags([...tags])
+  }
+
+  // タグ追加時に入力に応じて値を変更する
+  const handleNewTagChange = (e: any) => {
+    setNewTag(e.target.value);
+  }
+
+  // タグを追加する
+  const handleAddNewTag = () => {
+    if(newTag == "") return; // 空欄の場合return
+    if (updateTags.includes(newTag)) { // 既に同じタグがある場合return
+      setNewTag("");
+      return;
+    }
+    setUpdateTags([...updateTags, newTag]);
+    setNewTag("");
+  };
+
+  const handleDeleteTag = (tag: string) => {
+    const filteredUpdateTags = updateTags.filter(word => word !== tag);
+    setUpdateTags(filteredUpdateTags)
+  };
+
+  
 
   // テーマの詳細情報を取得
   const handleGetTheme = async () => {
@@ -205,11 +255,18 @@ const Theme: React.FC = () => {
   }
 
   // テーマの詳細情報を更新
-  const handleUpdateTheme = async () => {
+  const handleUpdateTheme = async (themeUpdateStatus: number) => {
     const data: PutThemeRequest = {
-      title: updateTitle,
-      postStatus: postStatusOptions.indexOf(updatePostStatus),
+      title: title,
+      postStatus: postStatusOptions.indexOf(postStatus),
       tagList: tags
+    }
+
+    if(themeUpdateStatus == updateThemeTitle) {
+      data.title = updateTitle
+      data.postStatus = postStatusOptions.indexOf(updatePostStatus)
+    }else if(themeUpdateStatus == updateThemeTags) {
+      data.tagList = updateTags
     }
 
     try {
@@ -218,8 +275,14 @@ const Theme: React.FC = () => {
 
       if (res?.status === 200) {
         console.log("Updated")
-        setTitle(updateTitle)
-        setPostStatus(updatePostStatus)
+        if(themeUpdateStatus == updateThemeTitle) {
+          setTitle(updateTitle)
+          setPostStatus(updatePostStatus)
+          setIsEditingTitle(false)
+        }else if(themeUpdateStatus == updateThemeTags) {
+          setTags(updateTags)
+          setIsEditingTags(false)
+        }
       } else {
         console.log("No themes")
       }
@@ -228,7 +291,6 @@ const Theme: React.FC = () => {
     }
 
     setLoading(false)
-    setIsEditingTitle(false);
   }
 
   // テーマ削除
@@ -254,8 +316,8 @@ const Theme: React.FC = () => {
   // リンク集作成
   const handleCreateLinkCollection = async () => {
     const data: PostLinkCollectionRequest = {
-      subtitle: subtitle,
-      links: links
+      subtitle: newSubtitle,
+      links: newLinks
     }
 
     try {
@@ -265,8 +327,8 @@ const Theme: React.FC = () => {
       if (res?.status === 200) {
         console.log("OK")
         handleGetTheme()
-        setSubtitle("")
-        setLinks([])
+        setNewSubtitle("")
+        setNewLinks([])
       } else {
         console.log("Failed")
       }
@@ -320,33 +382,33 @@ const Theme: React.FC = () => {
 
   // リンク集のsubtitle修正
   const handleLinkCollectionSubtitleChange = (e: any) => {
-    setSubtitle(e.target.value)
+    setNewSubtitle(e.target.value)
   }
 
   // リンクフォーム追加
   const handleCreateLinkForm = () => {
-    setLinks([...links, { url: "", description: "" }])
+    setNewLinks([...newLinks, { url: "", description: "" }])
   }
 
   // リンクフォーム削除
   const handleDeleteLinkForm = (index: number) => {
-    const updatedLinks = [...links]
+    const updatedLinks = [...newLinks]
     updatedLinks.splice(index, 1)
-    setLinks(updatedLinks)
+    setNewLinks(updatedLinks)
   }
 
   // リンクフォームのurl修正
   const handleLinkUrlChange = (e: any, index: number) => {
-    const updatedLinks = [...links]
+    const updatedLinks = [...newLinks]
     updatedLinks[index].url = e.target.value
-    setLinks(updatedLinks)
+    setNewLinks(updatedLinks)
   }
 
   // リンクフォームのdescription修正
   const handleLinkDescriptionChange = (e: any, index: number) => {
-    const updatedLinks = [...links]
+    const updatedLinks = [...newLinks]
     updatedLinks[index].description = e.target.value
-    setLinks(updatedLinks)
+    setNewLinks(updatedLinks)
   }
 
   useEffect(() => {
@@ -457,73 +519,6 @@ const Theme: React.FC = () => {
     }));
   }
 
-  // タグ機能
-
-  const [updateTags, setUpdateTags] = useState<string[]>([]);
-  const [isEditingTags, setIsEditingTags] = useState<boolean>(false)
-
-  // タグをクリックした時に編集状態にする
-  const handleEditTags = () => {
-    if(currentUser == undefined) return
-    if(theme.user.userId != currentUser.id) return
-    setIsEditingTags(true)
-    setUpdateTags([...tags])
-  }
-
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState<string>("");
-
-  const handleNewTagChange = (e: any) => {
-    setNewTag(e.target.value);
-  }
-
-  const handleAddNewTag = () => {
-    if(newTag == "") return;
-    if (updateTags.includes(newTag)) {
-      setNewTag("");
-      return;
-    }
-    setUpdateTags([...updateTags, newTag]);
-    setNewTag("");
-  };
-
-  const handleDeleteTag = (tag: string) => {
-    const filteredUpdateTags = updateTags.filter(word => word !== tag);
-    setUpdateTags(filteredUpdateTags)
-  };
-
-  const handleEditTagsCancel = () => {
-    setNewTag("");
-    setIsEditingTags(false);
-  }
-
-  // テーマの詳細情報を更新
-  const handleUpdateThemeTags = async () => {
-    const data: PutThemeRequest = {
-      title: title,
-      postStatus: postStatusOptions.indexOf(postStatus),
-      tagList: updateTags
-    }
-
-    try {
-      const res = await putTheme(parsedId, data)
-      console.log(res)
-
-      if (res?.status === 200) {
-        console.log("Updated")
-        setNewTag("")
-        setTags([...updateTags])
-      } else {
-        console.log("No themes")
-      }
-    } catch (err) {
-      console.log(err)
-    }
-
-    setLoading(false)
-    setIsEditingTags(false);
-  }
-
   const updateEditStates = () => {
     const linkCollectionIds = theme.linkCollections?.map(lc => lc.linkCollectionId.toString()) || [];
   
@@ -563,12 +558,12 @@ const Theme: React.FC = () => {
                       <MenuItem value="Limited">Limited</MenuItem>
                       <MenuItem value="Public">Public</MenuItem>
                     </Select>
-                    <Button onClick={handleThemeTitleChangeCancel}>キャンセル</Button>
-                    <Button onClick={handleUpdateTheme}>保存</Button>
+                    <Button onClick={() => handleEditTitle(false)}>キャンセル</Button>
+                    <Button onClick={() => handleUpdateTheme(updateThemeTitle)}>保存</Button>
                   </>
                 ) : (
                   <>
-                    <h1 onClick={handleTitleClick}>{title}</h1>
+                    <h1 onClick={() => handleEditTitle(true)}>{title}</h1>
                   </>
                 )}
               </Grid>
@@ -590,8 +585,8 @@ const Theme: React.FC = () => {
                     onChange={handleNewTagChange}
                   />
                   <Button onClick={handleAddNewTag}>タグ保存</Button>
-                  <Button onClick={handleEditTagsCancel}>キャンセル</Button>
-                  <Button onClick={handleUpdateThemeTags}>保存</Button>
+                  <Button onClick={() => handleEditTags(false)}>キャンセル</Button>
+                  <Button onClick={() => handleUpdateTheme(updateThemeTags)}>保存</Button>
                 </>
               ) : (
                 <>
@@ -602,7 +597,7 @@ const Theme: React.FC = () => {
                       </>
                     ))}
                   </Grid>
-                  <Button onClick={handleEditTags}>タグを編集</Button>
+                  <Button onClick={() => handleEditTags(true)}>タグを編集</Button>
                 </>
               )}
             </Grid>
@@ -614,11 +609,11 @@ const Theme: React.FC = () => {
                       type="text"
                       placeholder="サブタイトル"
                       name="subtitle"
-                      value={subtitle}
+                      value={newSubtitle}
                       onChange={(e) => handleLinkCollectionSubtitleChange(e)}
                     />
                     <Button onClick={handleDestroyTheme}>テーマを削除</Button>
-                    {links.map((link: PostLinkCollectionRequestLink, index: number) => (
+                    {newLinks.map((link: PostLinkCollectionRequestLink, index: number) => (
                       <Grid item xs={12} key={index}>
                         <input
                           type="text"
