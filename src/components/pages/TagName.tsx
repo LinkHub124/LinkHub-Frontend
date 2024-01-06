@@ -13,32 +13,27 @@ import Box from "@mui/material/Box"
 
 import AlertMessage from "components/utils/AlertMessage"
 
-import { getUser } from "lib/api/user_name"
-import { GetUserResponse } from "interfaces/user"
+import { getTag } from "lib/api/tag_name"
+import { GetThemesResponse } from "interfaces/theme"
 
 import { AuthContext } from "App"
 
 // ユーザー一覧ページ
-const UserName: React.FC = () => {
-  const initialUserState: GetUserResponse = {
-    userId: 0,
-    name: "test_name"
-  }
-
+const TagName: React.FC = () => {
   const { currentUser } = useContext(AuthContext)
 
   const [loading, setLoading] = useState<boolean>(true)
-  const [user, setUser] = useState<GetUserResponse>(initialUserState)
+  const [themes, setThemes] = useState<GetThemesResponse[]>([])
 
-  const { user_name } = useParams<{ user_name: string }>()
+  const { tag_name } = useParams<{ tag_name: string }>()
 
-  // ユーザーを取得
-  const handleGetUser = async () => {
+  // タグに紐づいたテーマ一覧を取得
+  const handleGetThemes = async () => {
     try {
-      const res = await getUser(user_name as string)
+      const res = await getTag(tag_name as string)
 
       if (res?.status === 200) {
-        setUser(res?.data.user)
+        setThemes(res?.data.themes)
       } else {
         console.log("No User")
       }
@@ -50,7 +45,7 @@ const UserName: React.FC = () => {
   }
 
   useEffect(() => {
-    handleGetUser()
+    handleGetThemes()
   }, [])
 
   return (
@@ -68,15 +63,8 @@ const UserName: React.FC = () => {
                       justifyContent="center"
                       alignItems="center"
                     >
-                      <Avatar variant="rounded" src={user.image} sx={{ m: 3, width: 100, height: 100 }} />
-                      <Typography>{user?.name}</Typography>
-                      {
-                        currentUser?.name === user_name && (
-                          <Link to="/settings">
-                            ユーザー設定
-                          </Link>
-                        )
-                      }
+                      <Avatar variant="rounded" sx={{ m: 3, width: 100, height: 100 }} />
+                      <Typography>{tag_name}</Typography>
                     </Box>
                   </CardContent>
                 </Card>
@@ -84,17 +72,17 @@ const UserName: React.FC = () => {
               <Grid item xs={1}></Grid>
               <Grid item xs={8}>
                 {
-                  user.themes?.map((theme: any, index: number) => {
+                  themes?.map((theme: any, index: number) => {
                     const updatedAtDate = new Date(theme.updatedAt);
                     const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
                     return (
                         <Card className={`status-${theme.postStatus}`}>
                           <CardHeader
-                            avatar={<Avatar alt="avatar" src={user.image} />}
+                            avatar={<Avatar alt="avatar" src={theme.user.image} />}
                             title={
                               <Typography variant="body2" component="p" gutterBottom>
-                                <Link to={`/${user.name}`} style={{ color: 'black', textDecoration: 'none' }}>
-                                  {user.name} {formattedDate}
+                                <Link to={`/${theme.user.name}`} style={{ color: 'black', textDecoration: 'none' }}>
+                                  {theme.user.name} {formattedDate}
                                 </Link>
                               </Typography>
                             }
@@ -122,4 +110,4 @@ const UserName: React.FC = () => {
   )
 }
 
-export default UserName
+export default TagName

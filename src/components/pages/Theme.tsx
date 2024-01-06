@@ -608,13 +608,11 @@ const Theme: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Grid item xs={12}>
-                    {tags.map((tag: string) => (
-                      <>
-                        <h3>{tag}</h3>
-                      </>
-                    ))}
-                  </Grid>
+                  {tags.map((tag: string) => (
+                    <>
+                      <h3>{tag}</h3>
+                    </>
+                  ))}
                   <Button onClick={() => handleEditTags(true)}>タグを編集</Button>
                 </>
               )}

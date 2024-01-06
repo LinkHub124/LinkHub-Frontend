@@ -9,6 +9,7 @@ import Themes from "components/pages/Themes"
 import NewTheme from "components/pages/NewTheme"
 import Theme from "components/pages/Theme"
 import UserName from "components/pages/UserName"
+import TagName from "components/pages/TagName"
 import Settings from "components/pages/Settings"
 import Test from "components/pages/Test"
 
@@ -81,12 +82,13 @@ const App: React.FC = () => {
             <Route path="/sign_in" element={<SignIn />} />
             
             <Route path="/" element={<Themes />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/home" element={<Home />} />
             <Route path="/testtest" element={<Test />} />
             <Route path="/:user_name" element={<UserName />} />
             <Route path="/themes/new" element={<NewTheme />} />
             <Route path="/themes/:theme_id" element={<Theme />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/tags/:tag_name" element={<TagName />} />
             {/* <Route
               path="*"
               element={
