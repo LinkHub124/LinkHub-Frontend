@@ -38,8 +38,6 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ showModal, setShowModal, selectedLinks }) => {
   
   const [themeTitle, setThemeTitle] = useState<string>("")
-
-
   const navigate = useNavigate()
 
   // テーマ作成
@@ -68,6 +66,36 @@ const Modal: React.FC<ModalProps> = ({ showModal, setShowModal, selectedLinks })
   const onClose = () => {
     setShowModal(false);
   }
+  const { currentUser } = useContext(AuthContext)
+
+  const initialUserState: GetUserResponse = {
+    userId: 0,
+    name: "test_name"
+  }
+  const [user, setUser] = useState<GetUserResponse>(initialUserState)
+
+  // ユーザーを取得
+  const handleGetUser = async () => {
+    try {
+    const res = await getUser(currentUser!!.name)
+
+      if (res?.status === 200) {
+        setUser(res?.data.user)
+      } else {
+        console.log("No User")
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    handleGetUser()
+  }, [])
+
+  const handleNavigation = (id: number) => {
+    navigate(`/themes/${id}`, { state: { selectedLinks } });
+  };
 
   return (
     showModal ? (
@@ -93,6 +121,34 @@ const Modal: React.FC<ModalProps> = ({ showModal, setShowModal, selectedLinks })
             >
               テーマを作成
             </Button>
+            <Grid item xs={8}>
+              {
+                user.themes?.map((theme: any, index: number) => {
+                  const updatedAtDate = new Date(theme.updatedAt);
+                  const formattedDate = `${updatedAtDate.getFullYear()}/${(updatedAtDate.getMonth() + 1).toString().padStart(2, '0')}/${updatedAtDate.getDate().toString().padStart(2, '0')} ${updatedAtDate.getHours().toString().padStart(2, '0')}:${updatedAtDate.getMinutes().toString().padStart(2, '0')}`;
+                  return (
+                      <Card className={`status-${theme.postStatus}`}>
+                        <CardHeader
+                          avatar={<Avatar alt="avatar" src={user.image} />}
+                          title={
+                            <Typography variant="body2" component="p" gutterBottom>
+                              {user.name} {formattedDate}
+                            </Typography>
+                          }
+                        />
+                        <CardContent>
+                          <Typography variant="body1" component="p">
+                            <Button onClick={() => handleNavigation(theme.themeId)}>
+                              {theme.title}
+                            </Button>
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    
+                  );
+                })
+              }
+            </Grid>
           </div>
         </div>
       </>
