@@ -71,7 +71,7 @@ const SignIn: React.FC = () => {
         setCurrentUser(res.data.data)
         console.log(currentUser)
 
-        history("/home")
+        history("/")
 
         console.log("Signed in successfully!")
       } else {

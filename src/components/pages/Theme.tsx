@@ -9,6 +9,7 @@ import Select from '@mui/material/Select';
 import { useParams } from "react-router-dom"
 import { useNavigate } from 'react-router-dom'
 import Box from "@mui/material/Box"
+import { useLocation } from 'react-router-dom';
 
 import Dialog from "@mui/material/Dialog"
 import DialogContent from "@mui/material/DialogContent"
@@ -152,9 +153,19 @@ const Theme: React.FC = () => {
   const [newTag, setNewTag] = useState<string>("");
   const [isEditingTags, setIsEditingTags] = useState<boolean>(false)
 
+  // ブックマークから引き継いだ場合
+  const location = useLocation();
+  const { selectedLinks } = location.state || {};
+  const initialLinks = selectedLinks
+  ? selectedLinks.map((link: string) => ({
+      url: link,
+      description: ""
+    }))
+  : [];
+
   // 新規リンク集追加
   const [newSubtitle, setNewSubtitle] = useState<string>("")
-  const [newLinks, setNewLinks] = useState<PostLinkCollectionRequestLink[]>([])
+  const [newLinks, setNewLinks] = useState<PostLinkCollectionRequestLink[]>(initialLinks)
   
   // リンク集編集
   const [anchorEl, setAnchorEl] = useState(null);

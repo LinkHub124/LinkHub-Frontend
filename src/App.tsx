@@ -11,6 +11,7 @@ import Theme from "components/pages/Theme"
 import UserName from "components/pages/UserName"
 import TagName from "components/pages/TagName"
 import Settings from "components/pages/Settings"
+import Bookmark from "components/pages/Bookmark"
 import Test from "components/pages/Test"
 
 import { getCurrentUser } from "lib/api/auth"
@@ -83,6 +84,7 @@ const App: React.FC = () => {
             
             <Route path="/" element={<Themes />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/bookmark" element={<Bookmark />} />
             <Route path="/home" element={<Home />} />
             <Route path="/testtest" element={<Test />} />
             <Route path="/:user_name" element={<UserName />} />

@@ -62,6 +62,14 @@ const Header: React.FC = () => {
           <>
             <Button
               component={Link}
+              to="/bookmark"
+              color="inherit"
+              className={classes.linkBtn}
+            >
+              ブックマーク
+            </Button>
+            <Button
+              component={Link}
               to="/themes/new"
               color="inherit"
               className={classes.linkBtn}
